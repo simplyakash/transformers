@@ -17,6 +17,7 @@ Patch1
 Patch2
 Patch3
 Patch4
+
 4️⃣ Step 2 — Flatten patches
 Each patch:  16 × 16 × 3
 Flatten: 16 × 16 × 3 = 768
@@ -54,6 +55,7 @@ Example:
 [patch2_embedding]
 [patch3_embedding]
 [patch4_embedding]
+
 6️⃣ Step 4 — Add CLS token
 
 A classification token is added. CLS token → 1 × 128
@@ -126,6 +128,7 @@ Two linear layers:
 Example:
 h = GELU(XW1 + b1)
 output = hW2 + b2
+
 1️⃣1️⃣ Final representation
 After several transformer blocks: 5 × 128
 We take the CLS token: 1 × 128
@@ -167,6 +170,7 @@ classifier weights
 Optimizer:
 
 AdamW
+
 1️⃣4️⃣ Example Training Code (simplified)
 images = batch["image"]
 labels = batch["label"]
