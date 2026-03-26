@@ -162,10 +162,7 @@ Backpropagation
 
 Gradients computed for:
 
-patch embedding weights
-attention weights
-MLP weights
-classifier weights
+patch embedding weights,attention weights,MLP weights,classifier weights
 
 Optimizer:
 
