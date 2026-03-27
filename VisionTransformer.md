@@ -65,6 +65,9 @@ Patch1
 Patch2
 Patch3
 Patch4
+This is usually implemented as a Conv2D or Linear layer.
+
+**Parameters learned: ** W_patch,b_patch
 
 4️⃣ Step 2 — Flatten patches
 Each patch:  16 × 16 × 3
@@ -104,13 +107,13 @@ Example:
 [patch3_embedding]
 [patch4_embedding]
 
-6️⃣ Step 4 — Add CLS token
+6️⃣ Step 4 — Add CLS token **learnable parameter**
 
 A classification token is added. CLS token → 1 × 128
 Now total tokens: 5 tokens
 Matrix: 5 × 128
 
-7️⃣ Step 5 — Add positional embeddings
+7️⃣ Step 5 — Add positional embeddings **learnable positional embeddings.**
 Transformers don't know spatial order, so we add positions.
 Position embeddings: 5 × 128
 Final input to transformer:
@@ -130,9 +133,9 @@ Residual connections
 Suppose: tokens = 5, embedding = 128, heads = 4
 
 Head dimension: 128 / 4 = 32
-Compute Q, K, V
-Weight matrices:
-Wq = 128 × 128
+Compute Q, K, V **learnable parameter**
+Weight matrices: 
+Wq = 128 × 128 
 Wk = 128 × 128
 Wv = 128 × 128
 Input: X = 5 × 128
@@ -168,9 +171,10 @@ Multiply by V
 Output: 5 × 32
 
 All heads combined:
+Output=Concat(heads)WO​
 5 × 128
 
-🔟 MLP Layer
+🔟 MLP Layer **learnable parameter** These learn nonlinear feature transformations.
 Two linear layers:
 128 → 512 → 128
 
@@ -182,9 +186,9 @@ output = hW2 + b2
 After several transformer blocks: 5 × 128
 We take the CLS token: 1 × 128
 
-1️⃣2️⃣ Classification Head
+1️⃣2️⃣ Classification Head 
 
-Linear layer: 128 × num_classes
+Linear layer: 128 × num_classes   **learnable parameter**
 
 Example: 128 × 10
 Output: 1 × 10
@@ -248,3 +252,16 @@ Think of ViT like this:
 
 Image → words
 Transformer → language model
+
+
+7️⃣ Summary of learnable parts
+Component	Learnable?
+Patch embedding	✅
+Positional embedding	✅
+CLS token	✅
+Attention matrices (Q,K,V,O)	✅
+MLP layers	✅
+LayerNorm γ, β	✅
+Residual connection	❌
+Softmax	❌
+Activation (GELU)	❌
