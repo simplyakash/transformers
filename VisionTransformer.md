@@ -79,7 +79,8 @@ MLP
 Residual connections
 
 9️⃣ Self Attention Calculation (Example)
-Suppose: tokens = 5 embedding = 128 heads = 4
+Suppose: tokens = 5, embedding = 128, heads = 4
+
 Head dimension: 128 / 4 = 32
 Compute Q, K, V
 Weight matrices:
