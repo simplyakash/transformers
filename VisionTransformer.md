@@ -128,6 +128,9 @@ LayerNorm
 Multi-head Attention
 MLP
 Residual connections
+9️⃣ LayerNorm   **learnable parameter** γ (scale) and β (shift) ,Without LayerNorm: activations explode and training diverges
+x_norm = (x − μ) / σ
+y = γ * x_norm + β
 
 9️⃣ Self Attention Calculation (Example)
 Suppose: tokens = 5, embedding = 128, heads = 4
