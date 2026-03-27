@@ -1,3 +1,51 @@
+Residual connections in the full ViT pipeline
+
+Full flow:
+
+Image
+ ↓
+
+Patch embedding
+ ↓
+
+Add positional embedding
+ ↓
+
+Transformer Block 1
+   ├─ Attention + residual
+   └─ MLP + residual
+ ↓
+
+Transformer Block 2
+ ↓
+...
+ ↓
+
+Transformer Block L
+ ↓
+
+CLS token
+ ↓
+
+Classification head
+#######################
+One transformer block summary
+X
+ │
+LN
+ │
+MSA
+ │
++ X
+ │
+LN
+ │
+MLP
+ │
++ previous
+ │
+Output
+
 1️⃣ Idea of Vision Transformer
 
 The key idea from the paper An Image is Worth 16x16 Words:
