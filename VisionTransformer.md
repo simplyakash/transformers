@@ -52,14 +52,21 @@ The key idea from the paper An Image is Worth 16x16 Words:
 Treat image patches like words in a sentence and feed them to a transformer.
 Pipeline:
 Image -> Split into patches -> Flatten patches -> Linear embedding  -> Add positional embedding -> Transformer Encoder -> Classification head
-
+Example:
+Input image = 224 × 224 × 3
+Patch size = 16 × 16
+Embedding dim = 768
+Transformer blocks = 12
+Heads per block = 12
+Head dimension = 64
 2️⃣ Example Image
-Suppose we have: Image size = 32 × 32  Channels = 3 (RGB)
-So input tensor: 32 × 32 × 3
+Suppose we have: Image size = 224 × 224   Channels = 3 (RGB)
+So input tensor: 224 × 224  × 3
+[batch, channels, height, width] [1, 3, 224, 224]
 
 3️⃣ Step 1 — Split image into patches
-Patch size: 16 × 16  ; Number of patches:  32/16 = 2
-So total patches:  2 × 2 = 4 patches  ; Patch shapes: 16 × 16 × 3
+Patch size: 16 × 16  ; Number of patches:  224/16 = 14
+So total patches:  14x14=196 patches  ; Patch shapes: 16 × 16 × 3, Each patch has 16 × 16 × 3 = 768 values
 Example patches:
 Patch1
 Patch2
@@ -73,12 +80,14 @@ This is usually implemented as a Conv2D or Linear layer.
 Each patch:  16 × 16 × 3
 Flatten: 16 × 16 × 3 = 768
 So each patch becomes a vector:
+Total patches 14x14 = 196
 Patch1 → 768
 Patch2 → 768
 Patch3 → 768
 Patch4 → 768
 
-Matrix: 4 × 768
+
+Matrix: 196 × 768
 
 5️⃣ Step 3 — Linear Projection (Patch Embedding)
 ViT converts patches into embedding dimension.
