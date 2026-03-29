@@ -196,3 +196,33 @@ Training may require:
 Because feature resolution is low.
 
 10. Important DETR Variants
+
+- Deformable DETR
+- Conditional DETR
+- DAB-DETR
+- DN-DETR
+
+## Sample training code
+
+A runnable sample script is available at `examples/detr_train_sample.py`.
+
+It trains DETR on standard Pascal VOC layout:
+
+- `JPEGImages/` — images
+- `Annotations/` — one VOC XML per image
+
+Training uses only **`JPEGImages/`** and **`Annotations/`** under `VOC_ROOT`. Train/validation split is a random shuffle of all `*.xml` (fraction `VAL_FRACTION` in the script).
+
+Paths, splits, and hyperparameters are hardcoded at the top of the script (CONFIG block). Set `TEST_IMAGES_DIR` there for optional test inference; use `PREDICT_ONLY = True` to run inference only from `CHECKPOINT_DIR`.
+
+### Install
+
+```bash
+pip install torch torchvision transformers pillow
+```
+
+### Run
+
+```bash
+python examples/detr_train_sample.py
+```
