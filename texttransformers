@@ -15,13 +15,13 @@ Using BERT-Base dimensions.
 Model: BERT
 
 1️⃣ BERT-Base Configuration
-Parameter	Value
-Layers	12 encoder blocks
-Hidden size	768
-Attention heads	12
-Head dimension	64
+Parameter	            Value
+Layers	            12 encoder blocks
+Hidden size	            768
+Attention heads	      12
+Head dimension	      64
 Feedforward dimension	3072
-Max tokens	512
+Max tokens	            512
 
 Head dimension:
 
