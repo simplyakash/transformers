@@ -272,12 +272,12 @@ Output (5×768)
 
 Each BERT-Base encoder block contains:
 
-Component	Count
+Component				Count
 Linear layers in attention	4
-Linear layers in FFN	2
-LayerNorm	2
-Residual connections	2
-Dropout layers	2
+Linear layers in FFN		2
+LayerNorm				2
+Residual connections		2
+Dropout layers			2
 
 Total layers in BERT-Base:
 
