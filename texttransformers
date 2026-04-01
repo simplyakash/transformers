@@ -1,1 +1,294 @@
 
+Below is a complete step-by-step flow of one BERT-Base encoder block with all operations included:
+
+Multi-Head Attention
+Residual connection
+Dropout
+LayerNorm
+Feed Forward Network
+Residual again
+Dropout again
+LayerNorm again
+
+Using BERT-Base dimensions.
+
+Model: BERT
+
+1️⃣ BERT-Base Configuration
+Parameter	Value
+Layers	12 encoder blocks
+Hidden size	768
+Attention heads	12
+Head dimension	64
+Feedforward dimension	3072
+Max tokens	512
+
+Head dimension:
+
+768/12=64
+768/12=64
+2️⃣ Example Input Sentence
+
+Sentence:
+
+"I love transformers"
+
+After tokenization:
+
+[CLS] I love transformers [SEP]
+
+Total tokens:
+
+5 tokens
+3️⃣ Embedding Layer
+
+Each token becomes 768-dim vector
+
+Embeddings added together:
+
+Token Embedding
++ Position Embedding
++ Segment Embedding
+
+Result tensor:
+
+X shape = (5 , 768)
+
+Example simplified vector for one token:
+
+[CLS] = [0.2, 0.1, -0.4 ... 768]
+4️⃣ Start Encoder Block
+
+Input to encoder block:
+
+X = (5 × 768)
+5️⃣ Multi-Head Self Attention
+
+First compute Q, K, V
+
+Q = XWq
+K = XWk
+V = XWv
+
+Weights:
+
+Wq = (768 × 768)
+Wk = (768 × 768)
+Wv = (768 × 768)
+
+Output shapes:
+
+Q = (5 × 768)
+K = (5 × 768)
+V = (5 × 768)
+6️⃣ Split into 12 Heads
+
+Each head dimension:
+
+64
+
+Reshape:
+
+Q → (5 , 12 , 64)
+K → (5 , 12 , 64)
+V → (5 , 12 , 64)
+7️⃣ Attention Score
+
+For each head compute:
+
+QKᵀ
+
+Dimension:
+
+(5 × 64) × (64 × 5) = (5 × 5)
+
+Scale by √dk.
+
+dk = 64
+8️⃣ Attention Softmax
+
+Softmax over tokens:
+
+Example attention matrix:
+
+5 × 5
+
+Example row:
+
+[0.1 0.3 0.4 0.1 0.1]
+
+Meaning token attends to other tokens.
+
+9️⃣ Multiply With V
+Attention × V
+
+Shape:
+
+(5 × 5) × (5 × 64)
+
+Result:
+
+(5 × 64)
+
+Each head output.
+
+🔟 Concatenate Heads
+
+12 heads:
+
+12 × 64 = 768
+
+Result:
+
+(5 × 768)
+1️⃣1️⃣ Final Attention Projection
+
+Multiply with output matrix:
+
+Wo = (768 × 768)
+
+Output:
+
+Attention_output = (5 × 768)
+1️⃣2️⃣ Dropout
+
+BERT applies dropout (usually 0.1).
+
+Attention_output = Dropout(Attention_output)
+
+Shape unchanged:
+
+(5 × 768)
+1️⃣3️⃣ Residual Connection
+
+Add original input:
+
+Z1 = X + Attention_output
+
+Shape:
+
+(5 × 768)
+
+Residual helps gradient flow.
+
+1️⃣4️⃣ Layer Normalization
+
+Normalize each token vector.
+
+LayerNorm formula:
+
+LN(x) = (x − mean) / sqrt(var + ε) * γ + β
+
+Output:
+
+Z1_norm = LayerNorm(Z1)
+
+Shape:
+
+(5 × 768)
+1️⃣5️⃣ Feed Forward Network
+
+First linear layer:
+
+W1 = (768 × 3072)
+
+Multiply:
+
+(5 × 768) × (768 × 3072)
+
+Result:
+
+(5 × 3072)
+1️⃣6️⃣ Activation Function
+
+BERT uses GELU.
+
+FF1 = GELU(Z1_norm W1 + b1)
+
+Shape:
+
+(5 × 3072)
+1️⃣7️⃣ Second Linear Layer
+W2 = (3072 × 768)
+
+Multiply:
+
+(5 × 3072) × (3072 × 768)
+
+Result:
+
+(5 × 768)
+1️⃣8️⃣ Dropout Again
+FF2 = Dropout(FF2)
+
+Shape:
+
+(5 × 768)
+1️⃣9️⃣ Residual Connection Again
+
+Add skip connection:
+
+Z2 = Z1_norm + FF2
+
+Shape:
+
+(5 × 768)
+2️⃣0️⃣ LayerNorm Again
+Output = LayerNorm(Z2)
+
+Final output:
+
+(5 × 768)
+
+This becomes input to next encoder block.
+
+2️⃣1️⃣ Full Encoder Block Summary
+Input (5×768)
+      ↓
+Multi-Head Attention
+      ↓
+Linear Projection
+      ↓
+Dropout
+      ↓
+Add (Residual)
+      ↓
+LayerNorm
+      ↓
+Linear (768 → 3072)
+      ↓
+GELU
+      ↓
+Linear (3072 → 768)
+      ↓
+Dropout
+      ↓
+Add (Residual)
+      ↓
+LayerNorm
+      ↓
+Output (5×768)
+2️⃣2️⃣ Important Interview Point
+
+Each BERT-Base encoder block contains:
+
+Component	Count
+Linear layers in attention	4
+Linear layers in FFN	2
+LayerNorm	2
+Residual connections	2
+Dropout layers	2
+
+Total layers in BERT-Base:
+
+12 encoder blocks
+2️⃣3️⃣ Whole Model Flow
+Input tokens
+↓
+Embedding
+↓
+Encoder Block × 12
+↓
+CLS token representation
+↓
+Task head (classification / QA / NER)
