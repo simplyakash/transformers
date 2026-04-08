@@ -513,3 +513,238 @@ If you'd like, I can also show you something very useful for interviews and dron
 Difference between low-pass filters, high-pass filters, and band-pass filters with masks and frequency intuition.
 
 This helps understand why certain filters remove noise better than others.
+ caemra settings:
+ # 📸 Camera Settings Explained (Beginner Guide)
+
+Understanding camera settings becomes easy when you learn the **Exposure Triangle** — the three main controls that affect how your photo looks.
+
+---
+
+## 🔺 Exposure Triangle
+
+### 1. Shutter Speed
+**Controls:** Motion + Light duration
+
+- Fast (e.g., 1/1000s)
+  - Freezes motion
+  - Lets in less light
+- Slow (e.g., 1/10s, 1s)
+  - Creates motion blur
+  - Lets in more light
+
+---
+
+### 2. Aperture (f-number)
+**Controls:** Light + Background blur (Depth of Field)
+
+- Low f-number (f/1.8)
+  - Wide opening
+  - More light
+  - Blurry background (bokeh)
+- High f-number (f/16)
+  - Small opening
+  - Less light
+  - Sharp background
+
+---
+
+### 3. ISO
+**Controls:** Sensor sensitivity (brightness)
+
+- Low ISO (100)
+  - Clean image (less noise)
+  - Needs more light
+- High ISO (1600+)
+  - Brighter image
+  - More noise/grain
+
+---
+
+## ⚖️ How They Work Together
+
+| Setting        | Affects Light | Affects Look                |
+|----------------|--------------|-----------------------------|
+| Shutter Speed  | Yes          | Motion blur / sharpness     |
+| Aperture       | Yes          | Background blur             |
+| ISO            | Yes          | Noise / grain               |
+
+---
+
+## 🎨 Additional Important Settings
+
+### White Balance
+**Controls:** Color temperature
+
+- Auto → usually fine
+- Adjust if colors look off:
+  - Tungsten → cooler (blue)
+  - Shade → warmer
+
+---
+
+### Focus (AF / MF)
+**Controls:** What is sharp
+
+- AF (Auto Focus) → camera decides
+- MF (Manual Focus) → you decide
+
+---
+
+### Focal Length (Lens Zoom)
+**Controls:** Field of view
+
+- Wide (18mm) → more scene, slight distortion
+- Standard (50mm) → natural look
+- Telephoto (200mm) → zoomed in, background compression
+
+---
+
+## 📷 Example Settings
+
+### Portrait (Blurred Background)
+- Aperture: f/1.8 – f/2.8
+- Shutter Speed: ~1/100s
+- ISO: 100–400
+
+---
+
+### Landscape (Everything Sharp)
+- Aperture: f/8 – f/11
+- Shutter Speed: Adjust as needed
+- ISO: 100
+
+---
+
+### Action Photography
+- Shutter Speed: ~1/1000s
+- Aperture: f/2.8 – f/5.6
+- ISO: Adjust for brightness
+
+---
+
+### Night Photography
+- Shutter Speed: Slow (use tripod)
+- Aperture: Wide (f/1.8)
+- ISO: 800–3200
+
+---
+
+## 🧠 Quick Summary
+
+- **Shutter Speed** → Controls time (motion blur)
+- **Aperture** → Controls opening (depth of field)
+- **ISO** → Controls sensitivity (brightness & noise)
+
+---
+
+
+# 📸 Global Shutter vs Rolling Shutter (Camera Sensors Explained)
+
+Understanding shutter types helps you avoid weird distortions in photos and videos.
+
+---
+
+## 🟢 Global Shutter
+
+**How it works:**
+- The entire sensor captures the image **at the same time**
+
+### ✅ Result:
+- No motion distortion
+- Moving objects appear natural
+
+### 📷 Examples:
+- Spinning fan → blades look normal  
+- Fast-moving car → no bending or skew  
+
+### 👍 Pros:
+- No distortion
+- Accurate motion capture
+- Ideal for:
+  - Sports photography
+  - Industrial vision systems
+  - Scientific imaging
+
+### 👎 Cons:
+- More expensive
+- Sometimes lower dynamic range
+
+---
+
+## 🔵 Rolling Shutter (Common in Most Cameras)
+
+**How it works:**
+- The sensor captures the image **line by line (top to bottom)**
+
+---
+
+### ⚠️ Effects of Rolling Shutter
+
+#### 1. Jello Effect
+- Video looks wobbly when camera shakes
+
+#### 2. Skew / Bending
+- Fast-moving objects appear slanted
+
+#### 3. Partial Exposure
+- Flash may only illuminate part of the image
+
+---
+
+### 📷 Examples:
+- Spinning fan → appears curved  
+- Moving car → looks tilted or stretched  
+
+---
+
+## ⚖️ Comparison Table
+
+| Feature            | Global Shutter        | Rolling Shutter        |
+|--------------------|----------------------|------------------------|
+| Capture Method     | All at once          | Line-by-line           |
+| Motion Distortion  | ❌ None              | ⚠️ Yes                 |
+| Cost               | 💸 Expensive         | 💰 Cheaper             |
+| Common Usage       | High-end cameras     | Phones, DSLRs, mirrorless |
+
+---
+
+## 🧠 Easy Analogy
+
+- **Global Shutter** → Like a flash (everything captured instantly)  
+- **Rolling Shutter** → Like scanning a document (top to bottom)
+
+---
+
+## 📱 Real-World Usage
+
+Most modern devices use **rolling shutter**, including:
+- Smartphones  
+- Mirrorless cameras  
+- DSLRs  
+
+---
+
+## 🎯 When It Matters
+
+Rolling shutter issues appear when:
+- Shooting fast-moving subjects  
+- Recording video with camera movement  
+- Capturing spinning objects (fans, propellers)  
+
+---
+
+## 🔥 Tips to Reduce Rolling Shutter Effects
+
+- Use a **faster shutter speed**
+- Avoid rapid camera movement (panning)
+- Keep your camera steady
+- Use stabilization (tripod/gimbal)
+
+---
+
+## 🧠 Summary
+
+- **Global Shutter** → Best for accuracy, no distortion  
+- **Rolling Shutter** → More common, but can cause motion artifacts  
+
+---
