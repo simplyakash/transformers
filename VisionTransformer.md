@@ -1,279 +1,356 @@
-Residual connections in the full ViT pipeline
+Vision Transformer (ViT) — Complete Step-by-Step Explanation
 
-Full flow:
+This document explains the Vision Transformer (ViT) architecture step by step using an example configuration similar to ViT-Base.
 
+1. Core Idea of Vision Transformer
+
+Vision Transformer comes from the paper:
+
+An Image is Worth 16x16 Words
+
+The key idea is:
+
+Treat image patches as tokens (words) and process them using a Transformer encoder, similar to NLP models.
+
+Pipeline
 Image
- ↓
-
-Patch embedding
- ↓
-
+  ↓
+Split into patches
+  ↓
+Flatten patches
+  ↓
+Linear embedding
+  ↓
 Add positional embedding
- ↓
-
-Transformer Block 1
-   ├─ Attention + residual
-   └─ MLP + residual
- ↓
-
-Transformer Block 2
- ↓
-...
- ↓
-
-Transformer Block L
- ↓
-
-CLS token
- ↓
-
+  ↓
+Transformer Encoder
+  ↓
 Classification head
-#######################
-One transformer block summary
-X
- │
-LN
- │
-MSA
- │
-+ X
- │
-LN
- │
-MLP
- │
-+ previous
- │
-Output
+2. Example Configuration (ViT-Base)
+Parameter	Value
+Image size	224 × 224
+Patch size	16 × 16
+Embedding dimension	768
+Transformer blocks	12
+Attention heads	12
+Head dimension	64
 
-1️⃣ Idea of Vision Transformer
+Because:
 
-The key idea from the paper An Image is Worth 16x16 Words:
-Treat image patches like words in a sentence and feed them to a transformer.
-Pipeline:
-Image -> Split into patches -> Flatten patches -> Linear embedding  -> Add positional embedding -> Transformer Encoder -> Classification head
-Example:
-Input image = 224 × 224 × 3
-Patch size = 16 × 16
-Embedding dim = 768
-Transformer blocks = 12
-Heads per block = 12
-Head dimension = 64
-2️⃣ Example Image
-Suppose we have: Image size = 224 × 224   Channels = 3 (RGB)
-So input tensor: 224 × 224  × 3
-[batch, channels, height, width] [1, 3, 224, 224]
+768 / 12 = 64
+3. Example Input Image
 
-3️⃣ Step 1 — Split image into patches
-Patch size: 16 × 16  ; Number of patches:  224/16 = 14
-So total patches:  14x14=196 patches  ; Patch shapes: 16 × 16 × 3, Each patch has 16 × 16 × 3 = 768 values
-Example patches:
-Patch1
-Patch2
-Patch3
-Patch4
-This is usually implemented as a Conv2D or Linear layer.
+Input image size:
 
-**Parameters learned: ** W_patch,b_patch
+224 × 224 × 3
 
-4️⃣ Step 2 — Flatten patches
-Each patch:  16 × 16 × 3
-Flatten: 16 × 16 × 3 = 768
-So each patch becomes a vector:
-Total patches 14x14 = 196
-Patch1 → 768
-Patch2 → 768
-Patch3 → 768
-Patch4 → 768
+Typical tensor format (PyTorch):
 
+[batch, channels, height, width]
 
-Matrix: 196 × 768
+[1, 3, 224, 224]
+4. Split Image into Patches
 
-5️⃣ Step 3 — Linear Projection (Patch Embedding)
-ViT converts patches into embedding dimension.
-Suppose: embedding dimension = 128
+Patch size:
+
+16 × 16
+
+Number of patches per dimension:
+
+224 / 16 = 14
+
+Total patches:
+
+14 × 14 = 196 patches
+
+Each patch shape:
+
+16 × 16 × 3
+
+Values per patch:
+
+16 × 16 × 3 = 768
+
+Patch extraction is commonly implemented as:
+
+Conv2D(kernel_size=16, stride=16)
+
+Learnable parameters:
+
+W_patch
+b_patch
+5. Flatten Patches
+
+Each patch:
+
+16 × 16 × 3
+
+Flattened vector:
+
+768
+
+So the patch matrix becomes:
+
+196 × 768
+
+Where:
+
+[patches, features]
+6. Linear Projection (Patch Embedding)
+
+Each patch is projected into the embedding space.
+
+Embedding dimension:
+
+768
 
 Weight matrix:
 
-768 × 128
+768 × 768
 
-Calculation:
+Computation:
 
-Patch_vector (1×768) × Weight (768×128)
+Patch_vector (1 × 768)
+        ×
+Weight (768 × 768)
 
 Result:
 
-1 × 128
+1 × 768
 
-So all patches become:
+All patches become:
 
-4 × 128
+196 × 768
+7. Add CLS Token
 
-Example:
+A CLS token is a learnable vector used for classification.
 
-[patch1_embedding]
-[patch2_embedding]
-[patch3_embedding]
-[patch4_embedding]
+Shape:
 
-6️⃣ Step 4 — Add CLS token **learnable parameter**
+1 × 768
 
-A classification token is added. CLS token → 1 × 128
-Now total tokens: 5 tokens
-Matrix: 5 × 128
+After adding CLS:
 
-7️⃣ Step 5 — Add positional embeddings **learnable positional embeddings.**
-Transformers don't know spatial order, so we add positions.
-Position embeddings: 5 × 128
-Final input to transformer:
-X = patch_embeddings + position_embeddings
-Shape: 5 × 128
+197 × 768
+8. Add Positional Embeddings
 
-8️⃣ Step 6 — Transformer Encoder
-ViT uses standard transformer blocks.
+Transformers do not understand spatial order, so positional embeddings are added.
 
-Each block:
+Learnable positional embedding:
+
+197 × 768
+
+Final transformer input:
+
+X = patch_embeddings + positional_embeddings
+
+Shape:
+
+197 × 768
+9. Transformer Encoder
+
+Each transformer block contains:
+
 LayerNorm
-Multi-head Attention
+Multi-Head Self Attention
+Residual Connection
+LayerNorm
 MLP
-Residual connections
-9️⃣ LayerNorm   **learnable parameter** γ (scale) and β (shift) ,Without LayerNorm: activations explode and training diverges
-x_norm = (x − μ) / σ
+Residual Connection
+10. Transformer Block Structure
+Input X
+ │
+LayerNorm
+ │
+Multi-Head Self Attention
+ │
+Add Residual (X + Attention_Output)
+ │
+LayerNorm
+ │
+MLP
+ │
+Add Residual
+ │
+Output
+
+This is known as the Pre-LayerNorm Transformer architecture.
+
+1. Layer Normalization
+
+Learnable parameters:
+
+γ (scale)
+β (shift)
+
+Formula:
+
+x_norm = (x − μ) / sqrt(σ² + ε)
 y = γ * x_norm + β
 
-9️⃣ Self Attention Calculation (Example)
-Suppose: tokens = 5, embedding = 128, heads = 4
+Purpose:
 
-Head dimension: 128 / 4 = 32
-Compute Q, K, V **learnable parameter**
-Weight matrices: 
-Wq = 128 × 128 
-Wk = 128 × 128
-Wv = 128 × 128
-Input: X = 5 × 128
+stabilizes training
+prevents exploding activations
+12. Self-Attention Example
+
+Assume:
+
+tokens = 197
+embedding = 768
+heads = 12
+
+Head dimension:
+
+768 / 12 = 64
+
+Projection matrices:
+
+Wq = 768 × 768
+Wk = 768 × 768
+Wv = 768 × 768
+
 Compute:
-Q = XWq → 5 × 128
-K = XWk → 5 × 128
-V = XWv → 5 × 128
-Split into heads 5 × 4 × 32
 
-Attention score
-Formula:
-Attention(Q,K,V) = softmax(QKᵀ / √d) V
+Q = XWq → 197 × 768
+K = XWk → 197 × 768
+V = XWv → 197 × 768
+
+Split into heads:
+
+197 × 12 × 64
+Attention Formula
+Attention(Q, K, V) = softmax((QK^T) / √d_k) V
+where 
+Q = Query matrix
+K = Key matrix
+V = Value matrix
+d_k = dimension of key vectors 
+
 For one head:
-Q = 5 × 32
-K = 5 × 32
-Compute: QKᵀ
-Result: 5 × 5
 
-Example matrix:
+Q = 197 × 64
+K = 197 × 64
 
-[[2.1 1.3 0.9 0.4 0.7]
- [1.8 2.5 1.1 0.6 0.3]
- ...]
-Divide by: √32 ≈ 5.65
+Compute attention scores:
 
-Then:
-softmax
+QKᵀ → 197 × 197
 
-This gives attention weights.
+Scale:
 
-Multiply by V
-(5×5) × (5×32)
-Output: 5 × 32
+√64 = 8
 
-All heads combined:
-Output=Concat(heads)WO​
-5 × 128
+Then apply softmax.
 
-🔟 MLP Layer **learnable parameter** These learn nonlinear feature transformations.
+Multiply with V:
+
+(197 × 197) × (197 × 64)
+
+Output per head:
+
+197 × 64
+
+Concatenate heads:
+
+197 × 768
+
+Apply output projection:
+
+Wo = 768 × 768
+13. MLP Layer
+
+The MLP block performs nonlinear transformations.
+
 Two linear layers:
-128 → 512 → 128
 
-Example:
+768 → 3072 → 768
+
+Computation:
+
 h = GELU(XW1 + b1)
 output = hW2 + b2
+14. Final Representation
 
-1️⃣1️⃣ Final representation
-After several transformer blocks: 5 × 128
-We take the CLS token: 1 × 128
+After 12 transformer blocks:
 
-1️⃣2️⃣ Classification Head 
+197 × 768
 
-Linear layer: 128 × num_classes   **learnable parameter**
+The CLS token is extracted:
 
-Example: 128 × 10
-Output: 1 × 10
-Softmax:
-class probabilities
+1 × 768
+15. Classification Head
 
-1️⃣3️⃣ Training Process
+Final linear layer:
 
-Training steps:
+768 × num_classes
+
+Example (10 classes):
+
+768 × 10
+
+Output:
+
+1 × 10
+
+Softmax converts logits to probabilities.
+
+1. Training Process
+
+Training pipeline:
 
 Forward pass
-image → patches → embeddings → transformer → prediction
-Loss
-Usually: Cross Entropy Loss
+Image → patches → embeddings → transformer → prediction
+
+Loss function:
+
+Cross Entropy Loss
 
 Example:
-Predicted: [0.1,0.6,0.3]
+
+Predicted: [0.1, 0.6, 0.3]
 True label: class 2
 
 Loss:
+
 −log(0.6)
 
-Backpropagation
+Backpropagation updates all parameters.
 
-Gradients computed for:
-
-patch embedding weights,attention weights,MLP weights,classifier weights
-
-Optimizer:
+Optimizer commonly used:
 
 AdamW
+17. Why Vision Transformers Need Large Data
 
-1️⃣4️⃣ Example Training Code (simplified)
-images = batch["image"]
-labels = batch["label"]
+Unlike CNNs, ViT has very weak inductive bias.
 
-pred = model(images)
+CNN assumptions:
 
-loss = cross_entropy(pred, labels)
+locality
+translation invariance
 
-loss.backward()
+ViT must learn these from data.
 
-optimizer.step()
+Therefore large datasets are required, such as:
 
-1️⃣5️⃣ Why ViT needs large data
+ImageNet-21k  
+JFT-300M  
+18. Learnable Components Summary  
+Component	Learnable  
+Patch embedding	✅  
+Positional embedding	✅  
+CLS token	✅:w
 
-Vision Transformer has very weak inductive bias.
-
-Unlike CNNs:
-
-CNN assumes locality
-ViT learns everything from data
-
-So it requires:
-
-ImageNet-21k
-JFT-300M
-⭐ Final intuition
+  
+Attention matrices (Q,K,V,O)	✅  
+MLP layers	✅  
+LayerNorm γ, β	✅  
+Residual connections	❌  
+Softmax	❌  
+GELU activation	❌  
+Final Intuition
 
 Think of ViT like this:
 
-Image → words
-Transformer → language model
+Image → Words → Transformer → Language Model
 
-
-7️⃣ Summary of learnable parts
-Component	Learnable?
-Patch embedding	✅
-Positional embedding	✅
-CLS token	✅
-Attention matrices (Q,K,V,O)	✅
-MLP layers	✅
-LayerNorm γ, β	✅
-Residual connection	❌
-Softmax	❌
-Activation (GELU)	❌
+Image patches become tokens, and the transformer learns relationships between them.
