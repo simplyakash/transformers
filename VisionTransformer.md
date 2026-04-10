@@ -133,6 +133,8 @@ After adding CLS:
 
 197 × 768
 8. Add Positional Embeddings
+In Vision Transformers, positional embeddings are initialized as learnable parameters when the model is created. Their shape is (number of patches + 1, embedding dimension). During training, these embeddings are learned via backpropagation. 
+They are added to patch embeddings before being fed into the transformer to encode spatial information.
 
 Transformers do not understand spatial order, so positional embeddings are added.
 
