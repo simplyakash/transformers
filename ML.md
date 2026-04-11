@@ -155,6 +155,7 @@ The goal is to choose a model complexity that minimizes total prediction error.
 
 Regression tehcniques:
 🧠 📊 Regression Techniques — Complete Guide (Plain Text)
+
 🔵 1. What is Regression?
 
 🟢 Definition
@@ -168,6 +169,7 @@ Given input X → predict output Y
 
 🏠 Input: House size
 💰 Output: Price
+
 🔵 2. Linear Regression
 
 🟢 Model
@@ -187,10 +189,13 @@ Loss = (1/n) * sum( (y_i - y_pred_i)^2 )
 dL/dw = -(2/n) * X^T * (y - y_pred)
 
 dL/db = -(2/n) * sum(y - y_pred)
+
 🔵 3. Normal Equation (Closed Form Solution)
 w = (X^T * X)^(-1) * X^T * y
+
 🔵 4. Multiple Linear Regression
 y = w1*x1 + w2*x2 + ... + wn*xn + b
+
 🔵 5. Polynomial Regression
 
 🟢 Quadratic Example
@@ -200,6 +205,7 @@ y = a*x^2 + b*x + c
 🟡 General Form
 
 y = a0 + a1*x + a2*x^2 + ... + an*x^n
+
 🔵 6. Ridge Regression (L2 Regularization)
 
 🟢 Loss Function
@@ -209,15 +215,18 @@ Loss = (1/n) * sum( (y - y_pred)^2 ) + lambda * sum(w_j^2)
 🟡 Closed Form
 
 w = (X^T * X + lambda * I)^(-1) * X^T * y
+
 🔵 7. Lasso Regression (L1 Regularization)
 
 🟢 Loss Function
 
 Loss = (1/n) * sum( (y - y_pred)^2 ) + lambda * sum(|w_j|)
+
 🔵 8. Elastic Net
 Loss = (1/n) * sum( (y - y_pred)^2 ) 
        + lambda1 * sum(|w|) 
        + lambda2 * sum(w^2)
+
 🌳 9. Decision Tree Regression
 
 🟢 Prediction (mean of region)
@@ -249,6 +258,7 @@ Minimize: (1/2) * ||w||^2
 🟡 With Slack Variables
 
 Minimize: (1/2)*||w||^2 + C * sum(xi_i + xi_i*)
+
 🤖 12. Neural Network Regression
 
 🟢 Single Layer
