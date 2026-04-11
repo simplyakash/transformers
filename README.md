@@ -1,3 +1,15 @@
+## README MODE
+
+Give a README-ready response.
+
+Rules:
+- Use Markdown only
+- Use $$ $$ for all formulas
+- No code blocks for formulas
+- Keep everything clean and structured
+- Make it directly usable in GitHub README
+- 
+
 # transformers
 simple examples for transformers
 DETR (Detection Transformer) is an end-to-end object detection model that replaces traditional detection pipelines (anchors, region proposals, NMS) with a Transformer-based architecture.
