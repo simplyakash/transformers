@@ -268,6 +268,7 @@ y = f(W*x + b)
 🟡 Multi-layer
 
 y = fL( W_L * f_{L-1}( ... f1(W1*x + b1) ... ) + bL )
+
 ⚖️ 13. Bias-Variance Decomposition
 Total Error = Bias^2 + Variance + Noise
 🔥 14. Gradient Descent (Optimization)
@@ -277,6 +278,7 @@ Total Error = Bias^2 + Variance + Noise
 w = w - learning_rate * (dL/dw)
 
 b = b - learning_rate * (dL/db)
+
 ⚖️ 15. Bias-Variance Tradeoff
 Model	Bias	Variance
 Linear	High	Low
@@ -284,7 +286,8 @@ Polynomial	Medium	Medium
 Decision Tree	Low	High
 Random Forest	Medium	Low
 Neural Network	Low	High
-🔥 16. When to Use What
+
+🔥 16. **When to Use What**
 Situation	Best Model
 Simple linear data	Linear Regression
 Slight non-linearity	Polynomial
@@ -292,9 +295,14 @@ Too many features	Lasso
 Overfitting issue	Ridge
 Complex patterns	Random Forest / Neural Network
 Small dataset	SVR
+
 🎯 17. Key Insights
+
 Regression = function approximation
+
 Goal = minimize prediction error
+
 Regularization = control overfitting
+
 💥 Pro Tip (Interview Gold)
 Bias-Variance Tradeoff + Regularization = Core of Regression
