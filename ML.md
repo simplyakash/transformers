@@ -332,3 +332,174 @@ $$
 ## 💥 Pro Tip
 
 **Bias-Variance Tradeoff + Regularization = Core of Regression**
+
+
+
+
+# 🧠 📊 Classification Problems — Complete Guide
+
+---
+
+## 🔵 1. What is Classification?
+
+🟢 **Definition**  
+Classification is used to predict **discrete labels (categories)**
+
+🟡 **Goal**
+Predict class label y ∈ {0,1,...,K}
+
+🔷 **Examples**
+- 📧 Spam Detection → {Spam, Not Spam}  
+- 🖼️ Image Classification → {Cat, Dog, Car}  
+- 🏥 Disease Prediction → {Positive, Negative}  
+
+---
+
+## 🔵 2. Types of Classification
+
+### 🟢 Binary Classification
+- Two classes  
+- Example: {0,1}
+
+### 🟡 Multi-class Classification
+- More than 2 classes  
+- Example: {0,1,2,...,K}
+
+### 🔵 Multi-label Classification
+- Multiple labels per sample  
+- Example: {Dog, Brown, Running}
+
+---
+
+## 🔵 3. Logistic Regression
+
+### 🟢 Model (Sigmoid Function)
+$$
+\hat{y} = \sigma(z) = \frac{1}{1 + e^{-z}}, \quad z = w^T x + b
+$$
+
+### 🟡 Decision Boundary
+$$
+\hat{y} \geq 0.5 \Rightarrow \text{Class 1}, \quad \hat{y} < 0.5 \Rightarrow \text{Class 0}
+$$
+
+---
+
+## 🔵 4. Cross Entropy Loss (Binary)
+
+$$
+\text{Loss} = - \frac{1}{n} \sum \left[ y \log(\hat{y}) + (1 - y)\log(1 - \hat{y}) \right]
+$$
+
+---
+
+## 🔵 5. Softmax (Multi-class)
+
+### 🟢 Probability Distribution
+$$
+P(y = k) = \frac{e^{z_k}}{\sum_{j=1}^{K} e^{z_j}}
+$$
+
+---
+
+## 🔵 6. Categorical Cross Entropy
+
+$$
+\text{Loss} = - \sum_{k=1}^{K} y_k \log(\hat{y}_k)
+$$
+
+---
+
+## 🔵 7. Decision Boundary
+
+$$
+w^T x + b = 0
+$$
+
+---
+
+## 🔵 8. Evaluation Metrics
+
+### 🟢 Accuracy
+$$
+\text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+$$
+
+### 🟡 Precision
+$$
+\text{Precision} = \frac{TP}{TP + FP}
+$$
+
+### 🔵 Recall
+$$
+\text{Recall} = \frac{TP}{TP + FN}
+$$
+
+### 🔴 F1 Score
+$$
+F1 = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}}
+$$
+
+---
+
+## 🔵 9. Confusion Matrix
+
+|               | Predicted Positive | Predicted Negative |
+|--------------|-------------------|-------------------|
+| Actual Positive | TP              | FN                |
+| Actual Negative | FP              | TN                |
+
+---
+
+## 🔵 10. ROC Curve & AUC
+
+### 🟢 True Positive Rate (TPR)
+$$
+TPR = \frac{TP}{TP + FN}
+$$
+
+### 🟡 False Positive Rate (FPR)
+$$
+FPR = \frac{FP}{FP + TN}
+$$
+
+---
+
+## 🔵 11. Regularization (Classification)
+
+### 🟢 L2 (Ridge)
+$$
+\text{Loss} = \text{CrossEntropy} + \lambda \sum w^2
+$$
+
+### 🟡 L1 (Lasso)
+$$
+\text{Loss} = \text{CrossEntropy} + \lambda \sum |w|
+$$
+
+---
+
+## 🔵 12. Gradient Descent
+
+$$
+w = w - \eta \frac{\partial L}{\partial w}
+$$
+
+$$
+b = b - \eta \frac{\partial L}{\partial b}
+$$
+
+---
+
+## 🔵 13. Key Insights
+
+- Classification predicts categories, not continuous values  
+- Probabilities are mapped using sigmoid or softmax  
+- Cross-entropy is the main loss function  
+- Evaluation requires multiple metrics (not just accuracy)  
+
+---
+
+## 💥 Pro Tip (Interview Gold)
+
+Classification = Probability Estimation + Decision Boundary
