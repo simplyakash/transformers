@@ -191,95 +191,143 @@ dL/dw = -(2/n) * X^T * (y - y_pred)
 dL/db = -(2/n) * sum(y - y_pred)
 
 🔵 3. Normal Equation (Closed Form Solution)
-w = (X^T * X)^(-1) * X^T * y
+
+$w = (X^T X)^{-1} X^T y$
 
 🔵 4. Multiple Linear Regression
-y = w1*x1 + w2*x2 + ... + wn*xn + b
 
-🔵 5. Polynomial Regression
+$$
+y = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b
+$$
+## 🔵 Polynomial Regression
 
-🟢 Quadratic Example
+### 🟢 Model
+$$
+y = a x^2 + b x + c
+$$
 
-y = a*x^2 + b*x + c
+### 🟡 General Form
+$$
+y = a_0 + a_1 x + a_2 x^2 + \dots + a_n x^n
+$$
 
-🟡 General Form
+---
 
-y = a0 + a1*x + a2*x^2 + ... + an*x^n
+## 🔵 6. Ridge Regression (L2 Regularization)
 
-🔵 6. Ridge Regression (L2 Regularization)
+### 🟢 Loss Function
+$$
+\text{Loss} = \frac{1}{n} \sum (y - \hat{y})^2 + \lambda \sum w_j^2
+$$
 
-🟢 Loss Function
+### 🟡 Closed Form
+$$
+w = (X^T X + \lambda I)^{-1} X^T y
+$$
 
-Loss = (1/n) * sum( (y - y_pred)^2 ) + lambda * sum(w_j^2)
+---
 
-🟡 Closed Form
+## 🔵 7. Lasso Regression (L1 Regularization)
 
-w = (X^T * X + lambda * I)^(-1) * X^T * y
+### 🟢 Loss Function
+$$
+\text{Loss} = \frac{1}{n} \sum (y - \hat{y})^2 + \lambda \sum |w_j|
+$$
 
-🔵 7. Lasso Regression (L1 Regularization)
+---
 
-🟢 Loss Function
+## 🔵 8. Elastic Net
 
-Loss = (1/n) * sum( (y - y_pred)^2 ) + lambda * sum(|w_j|)
+$$
+\text{Loss} = \frac{1}{n} \sum (y - \hat{y})^2 
++ \lambda_1 \sum |w| 
++ \lambda_2 \sum w^2
+$$
 
-🔵 8. Elastic Net
-Loss = (1/n) * sum( (y - y_pred)^2 ) 
-       + lambda1 * sum(|w|) 
-       + lambda2 * sum(w^2)
+---
 
-🌳 9. Decision Tree Regression
+## 🌳 9. Decision Tree Regression
 
-🟢 Prediction (mean of region)
+### 🟢 Prediction (Mean of Region)
+$$
+\hat{y} = \frac{1}{N_{\text{region}}} \sum y_i
+$$
 
-y_pred = (1 / N_region) * sum(y_i in region)
+### 🟡 Split Criterion (MSE)
+$$
+\text{MSE} = \frac{1}{n} \sum (y_i - \bar{y})^2
+$$
 
-🟡 Split Criterion (MSE)
+---
 
-MSE = (1/n) * sum( (y_i - y_mean)^2 )
-🌲 10. Random Forest Regression
+## 🌲 10. Random Forest Regression
 
-🟢 Prediction (average of trees)
-
-y_pred = (1 / T) * sum(prediction_from_each_tree)
+### 🟢 Prediction (Average of Trees)
+$$
+\hat{y} = \frac{1}{T} \sum \hat{y}^{(t)}
+$$
 
 Where:
+- $T$ = number of trees
 
-T = number of trees
-📏 11. Support Vector Regression (SVR)
+---
 
-🟢 Objective
+## 📏 11. Support Vector Regression (SVR)
 
-Minimize: (1/2) * ||w||^2
+### 🟢 Objective
+$$
+\min \frac{1}{2} \|w\|^2
+$$
 
-🟡 Constraint
+### 🟡 Constraint
+$$
+|y_i - (w x_i + b)| \leq \epsilon
+$$
 
-|y_i - (w*x_i + b)| <= epsilon
+### 🟡 With Slack Variables
+$$
+\min \frac{1}{2} \|w\|^2 + C \sum (\xi_i + \xi_i^*)
+$$
 
-🟡 With Slack Variables
+---
 
-Minimize: (1/2)*||w||^2 + C * sum(xi_i + xi_i*)
+## 🤖 12. Neural Network Regression
 
-🤖 12. Neural Network Regression
+### 🟢 Single Layer
+$$
+y = f(Wx + b)
+$$
 
-🟢 Single Layer
+### 🟡 Multi-layer
+$$
+y = f_L \big( W_L \, f_{L-1} ( \dots f_1(W_1 x + b_1) \dots ) + b_L \big)
+$$
 
-y = f(W*x + b)
+---
 
-🟡 Multi-layer
+## ⚖️ 13. Bias-Variance Decomposition
 
-y = fL( W_L * f_{L-1}( ... f1(W1*x + b1) ... ) + bL )
+$$
+\text{Total Error} = \text{Bias}^2 + \text{Variance} + \text{Noise}
+$$
 
-⚖️ 13. Bias-Variance Decomposition
-Total Error = Bias^2 + Variance + Noise
-🔥 14. Gradient Descent (Optimization)
+---
 
-🟢 Update Rule
+## 🔥 14. Gradient Descent (Optimization)
 
-w = w - learning_rate * (dL/dw)
+### 🟢 Update Rule
+$$
+w = w - \eta \frac{\partial L}{\partial w}
+$$
 
-b = b - learning_rate * (dL/db)
+$$
+b = b - \eta \frac{\partial L}{\partial b}
+$$
 
-⚖️ 15. Bias-Variance Tradeoff
+---
+
+## ⚖️ 15. Bias-Variance Tradeoff
+
 | Model           | Bias   | Variance |
 |----------------|--------|----------|
 | Linear         | High   | Low      |
@@ -288,7 +336,10 @@ b = b - learning_rate * (dL/db)
 | Random Forest  | Medium | Low      |
 | Neural Network | Low    | High     |
 
-🔥 16. **When to Use What**
+---
+
+## 🔥 16. When to Use What
+
 | Situation               | Best Model                     |
 |------------------------|-------------------------------|
 | Simple linear data     | Linear Regression             |
@@ -298,13 +349,17 @@ b = b - learning_rate * (dL/db)
 | Complex patterns       | Random Forest / Neural Network|
 | Small dataset          | SVR                           |
 
-🎯 17. Key Insights
+---
 
-Regression = function approximation
+## 🎯 17. Key Insights
 
-Goal = minimize prediction error
+- Regression = function approximation  
+- Goal = minimize prediction error  
+- Regularization = control overfitting  
 
-Regularization = control overfitting
+---
 
-💥 Pro Tip (Interview Gold)
-Bias-Variance Tradeoff + Regularization = Core of Regression
+## 💥 Pro Tip (Interview Gold)
+
+**Bias-Variance Tradeoff + Regularization = Core of Regression**
+
