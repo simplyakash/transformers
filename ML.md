@@ -152,3 +152,139 @@ Reduce model sensitivity:
 Bias–variance tradeoff describes the balance between **underfitting and overfitting**.  
 High bias models are too simple and underfit the data, while high variance models are too complex and overfit the training data.  
 The goal is to choose a model complexity that minimizes total prediction error.
+
+Regression tehcniques:
+🧠 📊 Regression Techniques — Complete Guide (Plain Text)
+🔵 1. What is Regression?
+
+🟢 Definition
+Regression is used to predict continuous values
+
+🟡 Goal
+
+Given input X → predict output Y
+
+🔷 Example
+
+🏠 Input: House size
+💰 Output: Price
+🔵 2. Linear Regression
+
+🟢 Model
+
+y = m*x + b
+
+🟡 Matrix Form
+
+y = X*w + b
+
+🟡 Loss Function (Mean Squared Error)
+
+Loss = (1/n) * sum( (y_i - y_pred_i)^2 )
+
+🟡 Gradients
+
+dL/dw = -(2/n) * X^T * (y - y_pred)
+
+dL/db = -(2/n) * sum(y - y_pred)
+🔵 3. Normal Equation (Closed Form Solution)
+w = (X^T * X)^(-1) * X^T * y
+🔵 4. Multiple Linear Regression
+y = w1*x1 + w2*x2 + ... + wn*xn + b
+🔵 5. Polynomial Regression
+
+🟢 Quadratic Example
+
+y = a*x^2 + b*x + c
+
+🟡 General Form
+
+y = a0 + a1*x + a2*x^2 + ... + an*x^n
+🔵 6. Ridge Regression (L2 Regularization)
+
+🟢 Loss Function
+
+Loss = (1/n) * sum( (y - y_pred)^2 ) + lambda * sum(w_j^2)
+
+🟡 Closed Form
+
+w = (X^T * X + lambda * I)^(-1) * X^T * y
+🔵 7. Lasso Regression (L1 Regularization)
+
+🟢 Loss Function
+
+Loss = (1/n) * sum( (y - y_pred)^2 ) + lambda * sum(|w_j|)
+🔵 8. Elastic Net
+Loss = (1/n) * sum( (y - y_pred)^2 ) 
+       + lambda1 * sum(|w|) 
+       + lambda2 * sum(w^2)
+🌳 9. Decision Tree Regression
+
+🟢 Prediction (mean of region)
+
+y_pred = (1 / N_region) * sum(y_i in region)
+
+🟡 Split Criterion (MSE)
+
+MSE = (1/n) * sum( (y_i - y_mean)^2 )
+🌲 10. Random Forest Regression
+
+🟢 Prediction (average of trees)
+
+y_pred = (1 / T) * sum(prediction_from_each_tree)
+
+Where:
+
+T = number of trees
+📏 11. Support Vector Regression (SVR)
+
+🟢 Objective
+
+Minimize: (1/2) * ||w||^2
+
+🟡 Constraint
+
+|y_i - (w*x_i + b)| <= epsilon
+
+🟡 With Slack Variables
+
+Minimize: (1/2)*||w||^2 + C * sum(xi_i + xi_i*)
+🤖 12. Neural Network Regression
+
+🟢 Single Layer
+
+y = f(W*x + b)
+
+🟡 Multi-layer
+
+y = fL( W_L * f_{L-1}( ... f1(W1*x + b1) ... ) + bL )
+⚖️ 13. Bias-Variance Decomposition
+Total Error = Bias^2 + Variance + Noise
+🔥 14. Gradient Descent (Optimization)
+
+🟢 Update Rule
+
+w = w - learning_rate * (dL/dw)
+
+b = b - learning_rate * (dL/db)
+⚖️ 15. Bias-Variance Tradeoff
+Model	Bias	Variance
+Linear	High	Low
+Polynomial	Medium	Medium
+Decision Tree	Low	High
+Random Forest	Medium	Low
+Neural Network	Low	High
+🔥 16. When to Use What
+Situation	Best Model
+Simple linear data	Linear Regression
+Slight non-linearity	Polynomial
+Too many features	Lasso
+Overfitting issue	Ridge
+Complex patterns	Random Forest / Neural Network
+Small dataset	SVR
+🎯 17. Key Insights
+Regression = function approximation
+Goal = minimize prediction error
+Regularization = control overfitting
+💥 Pro Tip (Interview Gold)
+Bias-Variance Tradeoff + Regularization = Core of Regression
