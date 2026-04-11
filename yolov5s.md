@@ -19,53 +19,70 @@ P5 → stride 32
 🧱 2. BACKBONE (CSPDarknet)
 
 👉 CSP = Cross Stage Partial Network
+
 👉 C3 = CSP Bottleneck block
 
 🔹 Layer 0: Conv
 640×640×3
 ↓ Conv (k=6, s=2, p=2)
 320×320×32
+
 🔹 Layer 1: Conv
 320×320×32
 ↓ Conv (k=3, s=2)
 160×160×64
+
 🔹 Layer 2: C3 (n=1)
 160×160×64 → 160×160×64
+
 🔹 Layer 3: Conv
 160×160×64
 ↓ Conv (s=2)
 80×80×128
+
 🔹 Layer 4: C3 (n=3)
 80×80×128 → 80×80×128   ← P3 (saved)
+
 🔹 Layer 5: Conv
 80×80×128
 ↓ Conv (s=2)
 40×40×256
+
 🔹 Layer 6: C3 (n=3)
 40×40×256 → 40×40×256   ← P4 (saved)
+
 🔹 Layer 7: Conv
 40×40×256
 ↓ Conv (s=2)
 20×20×512
+
 🔹 Layer 8: C3 (n=1)
 20×20×512 → 20×20×512
+
 🔹 Layer 9: SPPF
 
 👉 SPPF = Spatial Pyramid Pooling Fast
 
 20×20×512 → 20×20×512   ← P5 (saved)
 📌 Backbone Outputs
+
 P3 → 80×80×128
+
 P4 → 40×40×256
+
 P5 → 20×20×512
+
 🔗 3. NECK
+
 🔼 FPN (Feature Pyramid Network — Top-Down)
+
 🔹 Layer 10: Reduce + Upsample
 20×20×512
 ↓ Conv (1×1)
 20×20×256
 ↓ Upsample
 40×40×256
+
 🔹 Layer 11: Concat with P4
 40×40×256 (upsampled)
 + 40×40×256 (P4)
@@ -73,12 +90,14 @@ P5 → 20×20×512
 40×40×512
 ↓ C3 (n=1)
 40×40×256
+
 🔹 Layer 12: Reduce + Upsample
 40×40×256
 ↓ Conv (1×1)
 40×40×128
 ↓ Upsample
 80×80×128
+
 🔹 Layer 13: Concat with P3
 80×80×128 (upsampled)
 + 80×80×128 (P3)
@@ -87,10 +106,12 @@ P5 → 20×20×512
 ↓ C3 (n=1)
 80×80×128   ← FPN output (small objects)
 🔽 PAN (Path Aggregation Network — Bottom-Up)
+
 🔹 Layer 14: Downsample
 80×80×128
 ↓ Conv (s=2)
 40×40×256
+
 🔹 Layer 15: Concat
 40×40×256
 + 40×40×256 (from Layer 11)
@@ -98,10 +119,12 @@ P5 → 20×20×512
 40×40×512
 ↓ C3 (n=1)
 40×40×256   ← PAN mid
+
 🔹 Layer 16: Downsample
 40×40×256
 ↓ Conv (s=2)
 20×20×512
+
 🔹 Layer 17: Concat
 20×20×512
 + 20×20×512 (SPPF output)
@@ -114,18 +137,22 @@ Small → 80×80×128
 Medium → 40×40×256
 Large → 20×20×512
 🎯 4. HEAD (Detection Layer)
+
 🔹 Anchors per scale = 3
+
 🔹 Classes = Nc (example: 80 for COCO)
 
 Each anchor predicts:
 
 5 + Nc = [x, y, w, h, obj + classes]
+
 🔹 Output Channels
 Small: 128 → Conv → 80×80×(3 × (5+Nc))
 Medium: 256 → Conv → 40×40×(3 × (5+Nc))
 Large: 512 → Conv → 20×20×(3 × (5+Nc))
 🔢 Example (COCO: Nc=80)
 3 × (5 + 80) = 255
+
 🔹 Final Outputs
 80×80×255
 40×40×255
@@ -211,8 +238,10 @@ Input feature map:
 After final conv:
 
 each cell predicts 3 bounding boxes
+
 🔹 Medium Scale
 40×40×256 → Conv → 40×40×(3 × (5 + Nc))
+
 🔹 Large Scale
 20×20×512 → Conv → 20×20×(3 × (5 + Nc))
 📌 4. What is this (3 × (5 + Nc))?
@@ -243,6 +272,7 @@ Imagine dividing image:
 
 🔹 80×80 grid
 Lots of tiny cells → good for tiny objects
+
 🔹 20×20 grid
 Big cells → good for large objects
 📌 7. Final Mental Model
