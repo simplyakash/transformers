@@ -1,205 +1,175 @@
-# Bias–Variance Tradeoff
-
-The bias–variance tradeoff explains how model complexity affects prediction error in machine learning.
-
-A model must balance:
-
-- **Bias** (error from wrong assumptions)
-- **Variance** (error from sensitivity to training data)
-
-The goal is to find a model that generalizes well to unseen data.
 
 ---
 
-# Bias
+## 🔵 2. Variance
 
-## Meaning
+### 🟢 Meaning
+Variance measures how much predictions **change with different training data**.
 
-Bias is the error caused by **oversimplified assumptions in the learning algorithm**.
+High variance means the model is **too sensitive** to training data.
 
-High bias means the model is **too simple** and cannot capture the true relationship in data.
+### 🟡 Characteristics
+- Overfitting  
+- Very low training error  
+- High test error  
+- Learns noise instead of patterns  
 
-## Characteristics
-
-- Model underfits the data
-- High training error
-- High test error
-- Predictions are overly simplified
-
-## Example
-
-Using **linear regression** to model a highly nonlinear relationship.
-
-```
-True relation: curve
-Model: straight line
-```
+### 🔷 Example
+A deep neural network trained on a small dataset.
 
 ---
 
-# Variance
+## ⚖️ 3. Bias–Variance Tradeoff
 
-## Meaning
+As model complexity increases:
 
-Variance measures how much the model output **changes when trained on different datasets**.
+| Model Complexity | Bias   | Variance |
+|------------------|--------|----------|
+| Low              | High   | Low      |
+| Medium           | Balanced | Balanced |
+| High             | Low    | High     |
 
-High variance means the model is **too sensitive to training data**.
-
-## Characteristics
-
-- Model overfits the data
-- Very low training error
-- High test error
-- Learns noise instead of patterns
-
-## Example
-
-A very deep neural network trained on a small dataset.
+👉 Goal: find the **optimal balance**
 
 ---
 
-# Bias–Variance Tradeoff
+## 📉 4. Error Decomposition
 
-If we increase model complexity:
+$$
+\text{Total Error} = \text{Bias}^2 + \text{Variance} + \text{Irreducible Error}
+$$
 
-| Model Complexity | Bias | Variance |
-|------------------|------|----------|
-| Low complexity | High | Low |
-| Medium complexity | Balanced | Balanced |
-| High complexity | Low | High |
-
-So we must find a **balance between bias and variance**.
-
----
-
-# Error Decomposition
-
-Total prediction error can be written as:
-
-```
-Total Error = Bias² + Variance + Irreducible Error
-```
-
-Where:
-
-- **Bias²** → error due to wrong model assumptions  
-- **Variance** → error due to sensitivity to training data  
-- **Irreducible Error** → noise inherent in data
+### 🟢 Components
+- **Bias²** → error due to wrong assumptions  
+- **Variance** → sensitivity to data  
+- **Irreducible Error** → noise in data  
 
 ---
 
-# Visual Intuition
+## 🧩 5. Visual Intuition
 
-```
-Underfitting (High Bias)
+### 🔻 Underfitting (High Bias)
+- Model too simple  
+- Fails to learn patterns  
+- Poor training and test performance  
 
-Model too simple
-Fails to learn patterns
-Poor training and test performance
+### ⚖️ Good Fit
+- Balanced bias and variance  
+- Good generalization  
 
-
-Good Fit
-
-Balanced bias and variance
-Good generalization
-
-
-Overfitting (High Variance)
-
-Model too complex
-Memorizes training data
-Poor test performance
-```
+### 🔺 Overfitting (High Variance)
+- Model too complex  
+- Memorizes training data  
+- Poor test performance  
 
 ---
 
-# Methods to Reduce Bias
+## 🛠️ 6. How to Reduce Bias
 
 Increase model capacity:
 
-- Use more complex models
-- Add more features
-- Reduce regularization
-- Use deeper networks
+- Use more complex models  
+- Add more features  
+- Reduce regularization  
+- Use deeper networks  
 
 ---
 
-# Methods to Reduce Variance
+## 🛠️ 7. How to Reduce Variance
 
 Reduce model sensitivity:
 
-- Increase training data
-- Apply regularization (L1 / L2)
-- Use dropout
-- Use ensemble methods (Random Forest, Bagging)
-- Data augmentation
+- Increase training data  
+- Apply regularization (L1 / L2)  
+- Use dropout  
+- Use ensemble methods (Random Forest, Bagging)  
+- Data augmentation  
 
 ---
 
-# Practical Examples
+## 📊 8. Practical Examples
 
-| Model | Bias | Variance |
-|------|------|----------|
-| Linear Regression | High | Low |
-| Decision Tree | Low | High |
-| Random Forest | Medium | Low |
-| Deep Neural Network | Low | High |
+| Model                | Bias   | Variance |
+|---------------------|--------|----------|
+| Linear Regression   | High   | Low      |
+| Decision Tree       | Low    | High     |
+| Random Forest       | Medium | Low      |
+| Neural Network      | Low    | High     |
 
 ---
 
-# Simple Interview Explanation
+## 🎯 9. Interview Explanation
 
-Bias–variance tradeoff describes the balance between **underfitting and overfitting**.  
-High bias models are too simple and underfit the data, while high variance models are too complex and overfit the training data.  
-The goal is to choose a model complexity that minimizes total prediction error.
+Bias–variance tradeoff describes the balance between **underfitting and overfitting**.
 
-Regression tehcniques:
-🧠 📊 Regression Techniques — Complete Guide (Plain Text)
+- High bias → model too simple → underfitting  
+- High variance → model too complex → overfitting  
 
-🔵 1. What is Regression?
+👉 The goal is to choose a model that **minimizes total prediction error** and generalizes well.
 
-🟢 Definition
-Regression is used to predict continuous values
+# 🧠 📊 Regression Techniques — Complete Guide
 
-🟡 Goal
+---
 
+## 🔵 1. What is Regression?
+
+### 🟢 Definition
+Regression is used to predict **continuous values**
+
+### 🟡 Goal
 Given input X → predict output Y
 
-🔷 Example
+### 🔷 Example
+- 🏠 Input: House size  
+- 💰 Output: Price  
 
-🏠 Input: House size
-💰 Output: Price
+---
 
-🔵 2. Linear Regression
+## 🔵 2. Linear Regression
 
-🟢 Model
+### 🟢 Model
+$$
+y = m x + b
+$$
 
-y = m*x + b
+### 🟡 Matrix Form
+$$
+y = X w + b
+$$
 
-🟡 Matrix Form
+### 🟡 Loss Function (MSE)
+$$
+\text{Loss} = \frac{1}{n} \sum (y_i - \hat{y}_i)^2
+$$
 
-y = X*w + b
+### 🟡 Gradients
+$$
+\frac{\partial L}{\partial w} = -\frac{2}{n} X^T (y - \hat{y})
+$$
 
-🟡 Loss Function (Mean Squared Error)
+$$
+\frac{\partial L}{\partial b} = -\frac{2}{n} \sum (y - \hat{y})
+$$
 
-Loss = (1/n) * sum( (y_i - y_pred_i)^2 )
+---
 
-🟡 Gradients
+## 🔵 3. Normal Equation (Closed Form)
 
-dL/dw = -(2/n) * X^T * (y - y_pred)
+$$
+w = (X^T X)^{-1} X^T y
+$$
 
-dL/db = -(2/n) * sum(y - y_pred)
+---
 
-🔵 3. Normal Equation (Closed Form Solution)
-
-$w = (X^T X)^{-1} X^T y$
-
-🔵 4. Multiple Linear Regression
+## 🔵 4. Multiple Linear Regression
 
 $$
 y = w_1 x_1 + w_2 x_2 + \dots + w_n x_n + b
 $$
-## 🔵 Polynomial Regression
+
+---
+
+## 🔵 5. Polynomial Regression
 
 ### 🟢 Model
 $$
@@ -268,7 +238,7 @@ $$
 $$
 
 Where:
-- $T$ = number of trees
+- $T$ = number of trees  
 
 ---
 
@@ -313,7 +283,7 @@ $$
 
 ---
 
-## 🔥 14. Gradient Descent (Optimization)
+## 🔥 14. Gradient Descent
 
 ### 🟢 Update Rule
 $$
@@ -359,7 +329,6 @@ $$
 
 ---
 
-## 💥 Pro Tip (Interview Gold)
+## 💥 Pro Tip
 
 **Bias-Variance Tradeoff + Regularization = Core of Regression**
-
