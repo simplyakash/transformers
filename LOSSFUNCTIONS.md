@@ -13,6 +13,8 @@ $\lambda_1, \lambda_2$ → Weighting coefficients
 
 🔹 1. Contrastive Loss ($L_{contrastive}$)
 
+**InfoNCE Loss = Information Noise Contrastive Estimation**
+
 Used in CLIP-style models for aligning image and text embeddings.
 
 Formula:
@@ -34,6 +36,31 @@ $T_i$ → Text embedding
 $sim(\cdot)$ → Similarity function (cosine similarity)
 $\tau$ → Temperature parameter
 $N$ → Batch size
+
+Role of Temperature ($\tau$)
+Controls sharpness of softmax
+Lower $\tau$ → harder separation
+Higher $\tau$ → smoother distribution
+
+What it does:
+
+Takes a text $T_i$
+Compares it with all images in the batch
+Tries to:
+Maximize similarity with the correct image $I_i$
+Minimize similarity with incorrect images $I_j$
+
+👉 Using both ensures:
+
+Stronger alignment,
+Symmetric learning,
+Better retrieval performance
+
+🔹 Short Answer
+It is NOT plain Cross-Entropy
+It is a form of Contrastive Loss
+More specifically:
+👉 InfoNCE Loss InfoNCE = Information Noise Contrastive Estimation
 
 🔹 2. Cross-Entropy Loss ($L_{ce}$)
 
