@@ -72,9 +72,105 @@ $L_{ce} = - \sum_{t=1}^{T} y_t \log(p_t)$
 
 Where:
 
-$y_t$ → Ground truth token
-$p_t$ → Predicted probability
-$T$ → Sequence length
+$y_t$ → Ground truth label at time step t,Usually a one-hot vector (only the correct token = 1)
+$p_t$ → the model’s predicted probability for the correct token at step t
+$T$ → length of the sequence (number of tokens)
+
+### ✅ If the model is confident and correct
+
+
+p_t ≈ 1 → log(p_t) ≈ 0 → low loss
+
+
+---
+
+### ❌ If the model is wrong
+
+
+p_t ≈ 0 → log(p_t) → -∞ → high loss
+
+
+---
+### 🔢 Example Calculation (with Ground Truth)
+
+We use the formula:
+
+$$
+L_{ce} = - \sum_{t=1}^{T} y_t \log(p_t)
+$$
+
+
+### 🧾 Setup
+
+Assume sequence length T = 3, and for each step the vocabulary has 3 tokens.
+
+#### Step 1
+- True label: y₁ = [1, 0, 0]  
+- Predicted: p₁ = [0.9, 0.05, 0.05]  
+
+#### Step 2
+- True label: y₂ = [0, 1, 0]  
+- Predicted: p₂ = [0.2, 0.6, 0.2]  
+
+#### Step 3
+- True label: y₃ = [0, 0, 1]  
+- Predicted: p₃ = [0.7, 0.2, 0.1]  
+
+---
+
+### 🧮 Calculation
+
+Apply element-wise multiplication:
+
+#### Step 1
+$$
+y_1 \cdot \log(p_1) = 1 \cdot \log(0.9) + 0 + 0 = \log(0.9)
+$$
+
+#### Step 2
+$$
+y_2 \cdot \log(p_2) = 0 + 1 \cdot \log(0.6) + 0 = \log(0.6)
+$$
+
+#### Step 3
+$$
+y_3 \cdot \log(p_3) = 0 + 0 + 1 \cdot \log(0.1) = \log(0.1)
+$$
+
+---
+
+### ➕ Total Loss
+
+$$
+L_{ce} = - [\log(0.9) + \log(0.6) + \log(0.1)]
+$$
+
+$$
+L_{ce} \approx - [(-0.105) + (-0.511) + (-2.303)] = 2.919
+$$
+
+---
+
+### 💡 Key Insight
+
+Because \( y_t \) is **one-hot**, it “selects” only the correct token’s probability:
+
+- All incorrect tokens get multiplied by 0  
+- Only the correct token contributes to the loss  
+
+👉 That’s why it simplifies to:
+L = -∑ log(p_correct)
+---
+
+### 💡 Summary
+
+Cross-entropy loss measures how "surprised" the model is about the correct answer:
+
+- Less surprise → lower loss  
+- More surprise → higher loss 
+
+
+
 
 🔹 3. Image-Text Matching Loss ($L_{match}$)
 
@@ -89,6 +185,107 @@ Where:
 $y$ → Ground truth label (1 = match, 0 = non-match)
 $p$ → Predicted probability
 
+---
+### 🔢 Example: Binary Cross-Entropy (Matching Loss)
+
+We use the formula:
+
+$$
+L_{match} = - \left[ y \log(p) + (1 - y)\log(1 - p) \right]
+$$
+
+---
+
+### 🧾 Setup (same idea, but now binary)
+
+Instead of predicting over many tokens, we now ask:
+
+👉 “Does this pair match?” (e.g., image–text pair)
+
+- y = 1 → correct match  
+- y = 0 → incorrect match  
+- p = model’s predicted probability that it’s a match  
+
+---
+
+### 🧪 Example Cases
+
+#### ✅ Case 1: Correct match, high confidence
+- y = 1  
+- p = 0.9  
+
+$$
+L = - [1 \cdot \log(0.9) + (1 - 1)\cdot \log(1 - 0.9)]
+$$
+
+$$
+L = - \log(0.9) \approx 0.105
+$$
+
+👉 Low loss (good prediction)
+
+---
+
+#### ⚠️ Case 2: Correct match, medium confidence
+- y = 1  
+- p = 0.6  
+
+$$
+L = - \log(0.6) \approx 0.511
+$$
+
+👉 Moderate loss
+
+---
+
+#### ❌ Case 3: Correct match, wrong prediction
+- y = 1  
+- p = 0.1  
+
+$$
+L = - \log(0.1) \approx 2.303
+$$
+
+👉 Very high loss
+
+---
+
+### 🔁 Negative Case (important!)
+
+#### ❌ Case 4: Not a match, but model is wrong
+- y = 0  
+- p = 0.9  
+
+$$
+L = - [0 + 1 \cdot \log(1 - 0.9)]
+$$
+
+$$
+L = - \log(0.1) \approx 2.303
+$$
+
+👉 High loss (model is confidently wrong)
+
+---
+
+### 💡 Key Insight
+
+- The first term: \( y \log(p) \) → used when it's a **true match**  
+- The second term: \( (1 - y)\log(1 - p) \) → used when it's **not a match**  
+
+👉 The loss:
+- Rewards correct confidence  
+- Penalizes confident mistakes (very strongly)
+
+---
+
+### 🔗 Connection to Previous Example
+
+- Multi-class cross-entropy → choose correct token from many  
+- Binary cross-entropy → decide **match vs no match**
+
+👉 Same principle, simpler output space (just 0 or 1)
+---
 
 📊 Summary
 Loss Component	Type	Purpose
