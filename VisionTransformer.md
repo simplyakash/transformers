@@ -1,6 +1,218 @@
-# 🧠 Vision Transformer (ViT) — Step-by-Step Explanation
+# 🧠 Vision Transformer (ViT) 
+
+## 🎯 What Vision Transformer is Used For
+
+Vision Transformer (ViT) is used for a wide range of computer vision tasks, especially those involving image understanding.
 
 ---
+
+### 🔹 1. Image Classification
+
+The primary use case.
+
+- Predicts the class of an image  
+- Example: cat vs dog, object categories  
+
+---
+
+### 🔹 2. Object Detection
+
+- Identifies and localizes multiple objects in an image  
+- Often used with extensions like DETR  
+
+---
+
+### 🔹 3. Image Segmentation
+
+- Assigns a label to each pixel in an image  
+- Used in medical imaging and autonomous driving  
+
+---
+
+### 🔹 4. Image Captioning (Multimodal)
+
+- Generates text descriptions for images  
+- Combines vision and language understanding  
+
+---
+
+### 🔹 5. Visual Question Answering (VQA)
+
+- Answers questions about an image  
+- Example: “What color is the car?”  
+
+---
+
+### 🔹 6. Feature Extraction / Backbone
+
+- Used as a feature encoder in larger systems  
+- Often replaces CNNs in modern pipelines  
+
+---
+
+## 💡 Key Insight
+
+Vision Transformer is a general-purpose vision backbone, similar to how Transformers are used in NLP.
+
+👉 It learns rich representations of images that can be adapted to many different tasks.
+
+---
+
+# 🧠 Vision Transformer (ViT) — Complete Explanation
+
+Vision Transformer (ViT) is a model that applies the Transformer architecture, originally designed for natural language processing, to image data.
+
+The core idea of ViT is to treat an image as a sequence of smaller patches, similar to how a sentence is treated as a sequence of words.
+
+---
+
+## 🔄 Pipeline Overview
+
+Image → Patches → Embeddings → Transformer → Classification
+
+---
+
+## ⚙️ Example Configuration (ViT-Base)
+
+* Image size: 224 × 224
+* Patch size: 16 × 16
+* Embedding dimension: 768
+* Transformer blocks: 12
+* Attention heads: 12
+* Head dimension: 64 (since 768 / 12 = 64)
+
+---
+
+## 🖼️ Input Representation
+
+An input image of size 224 × 224 × 3 is divided into fixed-size patches of 16 × 16, resulting in 14 patches along each dimension and a total of 196 patches.
+
+Each patch has dimensions 16 × 16 × 3, which when flattened becomes a vector of size 768.
+
+These flattened patches are then linearly projected into an embedding space of dimension 768 using a learnable weight matrix.
+
+---
+
+## ➕ CLS Token and Positional Embedding
+
+A special classification token, called the CLS token, is added to the sequence of patch embeddings. This token is used to aggregate information from all patches for the final prediction.
+
+Since Transformers do not inherently capture spatial relationships, learnable positional embeddings are added to each patch embedding to encode positional information.
+
+The final input to the transformer encoder is a sequence of 197 tokens (196 patches + 1 CLS token), each of dimension 768.
+
+---
+
+## 🧠 Transformer Encoder
+
+The transformer encoder consists of multiple identical blocks, typically 12 in the ViT-Base configuration.
+
+Each transformer block includes:
+
+* Layer Normalization
+* Multi-Head Self-Attention
+* Residual connection
+* Layer Normalization
+* MLP (feed-forward network)
+* Residual connection
+
+---
+
+## 🔍 Self-Attention Mechanism
+
+In multi-head self-attention, the input embeddings are projected into query (Q), key (K), and value (V) matrices using learnable weights.
+
+For an input of shape 197 × 768 and 12 attention heads, each head operates on a subspace of dimension 64.
+
+Attention scores are computed using the scaled dot-product attention formula:
+
+softmax((QKᵀ) / √dₖ)
+
+where dₖ is the dimension of the key vectors.
+
+These attention scores are used to compute a weighted sum of the value vectors, producing the output of each attention head.
+
+The outputs from all heads are concatenated and passed through a final linear projection layer.
+
+---
+
+## 🔁 MLP Block
+
+The MLP block consists of two linear layers with a GELU activation in between.
+
+Typical transformation:
+768 → 3072 → 768
+
+This allows the model to learn nonlinear feature transformations.
+
+---
+
+## 📌 Final Representation
+
+After passing through all transformer blocks, the output corresponding to the CLS token is extracted as the final representation of the image.
+
+---
+
+## 🎯 Classification Head
+
+This representation is passed through a linear classification head to produce logits for each class.
+
+A softmax function is applied to convert logits into probabilities.
+
+---
+
+## 🏋️ Training
+
+During training, the model uses cross-entropy loss, which penalizes incorrect predictions based on the predicted probability of the true class.
+
+For example, if the predicted probability for the correct class is 0.6, the loss is computed as:
+
+−log(0.6)
+
+All parameters in the model, including patch embeddings, positional embeddings, attention weights, and MLP layers, are learned through backpropagation.
+
+The AdamW optimizer is commonly used to update the model parameters.
+
+---
+
+## 📊 Why ViT Needs Large Data
+
+Unlike convolutional neural networks (CNNs), Vision Transformers do not have strong inductive biases such as locality and translation invariance.
+
+As a result, ViTs require large-scale datasets to learn these patterns effectively.
+
+Common datasets used to train ViTs include:
+
+* ImageNet-21k
+* JFT-300M
+
+---
+
+## 🧩 Learnable Components
+
+* Patch embedding ✅
+* Positional embedding ✅
+* CLS token ✅
+* Attention matrices (Q, K, V, O) ✅
+* MLP layers ✅
+* LayerNorm parameters (γ, β) ✅
+
+Non-learnable:
+
+* Residual connections ❌
+* Softmax ❌
+* GELU ❌
+
+---
+
+## 💡 Final Intuition
+
+Vision Transformer processes images by converting them into a sequence of patches, treating them like tokens, and learning relationships between these patches using self-attention mechanisms.
+
+In simple terms:
+
+Image → Words → Transformer → Prediction
+
 
 ## 🔄 1. Full Pipeline
 
