@@ -48,7 +48,9 @@ Prediction Heads
 Typical backbone:
 
 ResNet-50
+
 3. Step-by-Step Working
+   
 Step 1 — Image → CNN backbone
 
 Image:
@@ -62,6 +64,7 @@ C × H/32 × W/32
 Example:
 
 3×800×800 → ResNet → 2048×25×25
+
 Step 2 — Flatten features
 
 Feature map reshaped to sequence:
@@ -109,6 +112,7 @@ Step 6 — Transformer Decoder
 Decoder performs:
 
 Cross Attention:
+
 object_query ↔ image features
 
 Each query tries to detect one object.
@@ -119,8 +123,8 @@ Output:
 
 Each prediction contains:
 
-Class probabilities
-Bounding box (x, y, w, h)
+Class probabilities   Bounding box (x, y, w, h)
+
 4. Prediction Head
 
 For each query:
@@ -130,6 +134,7 @@ Class head
 Predicts:
 
 N classes + 1 "no object"
+
 Box head
 
 Predicts normalized coordinates:
@@ -157,11 +162,13 @@ Classification loss
 Bounding box L1 loss
 +
 GIoU loss
+
 6. Loss Equation
 
 Total loss:
 
 Loss = Classification + λ1 * L1 bbox loss + λ2 * GIoU loss
+
 7. Why DETR does NOT need NMS
 
 Traditional detectors output many duplicate boxes → need NMS.
@@ -179,8 +186,11 @@ Very clean architecture.
 8. Advantages
 
 ✅ End-to-end training
+
 ✅ Global context via attention
+
 ✅ No hand-crafted components
+
 ✅ Simpler pipeline
 
 9. Limitations
@@ -209,6 +219,7 @@ A runnable sample script is available at `examples/detr_train_sample.py`.
 It trains DETR on standard Pascal VOC layout:
 
 - `JPEGImages/` — images
+  
 - `Annotations/` — one VOC XML per image
 
 Training uses only **`JPEGImages/`** and **`Annotations/`** under `VOC_ROOT`. Train/validation split is a random shuffle of all `*.xml` (fraction `VAL_FRACTION` in the script).
