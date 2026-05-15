@@ -49,8 +49,9 @@ on standard benchmarks.
 
 # 📌 Formula
 
-:contentReference[oaicite:0]{index=0}
-
+```text
+PPL = exp(-(1/T) ∑ₜ₌₁ᵀ log p(xₜ))
+``` 
 ---
 
 # 📌 Steps
@@ -93,7 +94,10 @@ Used for:
 
 # 📌 Formula
 
-:contentReference[oaicite:1]{index=1}
+```text
+L = -∑ₜ₌₁ᵀ yₜ log(pₜ)
+```
+
 
 ---
 
@@ -152,7 +156,9 @@ Measures partial correctness.
 
 # 📌 Formula
 
-:contentReference[oaicite:2]{index=2}
+```text
+F1 = 2PR / (P + R)
+```
 
 ---
 
@@ -212,7 +218,9 @@ Doesn’t capture meaning well
 
 # 📌 Final BLEU Formula
 
-:contentReference[oaicite:4]{index=4}
+```text
+BLEU = BP · exp(∑ wₙ log pₙ)
+```
 
 ---
 
@@ -245,7 +253,10 @@ Used in summarization.
 
 # 📌 ROUGE-N Formula
 
-:contentReference[oaicite:5]{index=5}
+```text
+ROUGE = overlapping n-grams / total n-grams in reference
+```
+
 
 ---
 
@@ -290,7 +301,9 @@ Better semantic understanding than BLEU.
 2. Compute Precision (P) and Recall (R)
 3. Combine:
 
-:contentReference[oaicite:6]{index=6}
+```text
+F = 10PR / (R + 9P)
+```
 
 4. Apply fragmentation penalty
 
@@ -408,8 +421,11 @@ Strict string match.
 
 # 📌 Formula
 
-:contentReference[oaicite:7]{index=7}
-
+```text
+EM =
+1   if exact match
+0   otherwise
+```
 ---
 
 # 📌 Steps
