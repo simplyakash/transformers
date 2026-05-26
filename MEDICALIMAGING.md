@@ -70,7 +70,26 @@ Dice = (2 × 80) / (90 + 100)
       = 160 / 190
       = 0.842
 ```
+```text
+0 ≤ Dice ≤ 1
+```
 
+| Dice Score | Meaning |
+|---|---|
+| 1.0 | Perfect segmentation |
+| 0.9+ | Excellent |
+| 0.8 – 0.9 | Very good |
+| 0.7 – 0.8 | Good |
+| 0.5 – 0.7 | Moderate |
+| < 0.5 | Poor segmentation |
+
+# 📊 Interpretation
+
+| Dice Value | Interpretation |
+|---|---|
+| 0 | No overlap |
+| 0.5 | Partial overlap |
+| 1 | Complete overlap |
 ---
 
 # 📌 Why Dice is Preferred
