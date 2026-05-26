@@ -499,8 +499,587 @@ Image → Patches → Tokens → Transformer → Prediction
 
 The model learns relationships between image regions.
 
-The model learns relationships between image regions.
+# 🧠 Difference Between Normalization in CNNs vs Transformers
 
+Normalization helps:
+- stabilize training
+- improve gradient flow
+- speed up convergence
+
+But:
+
+```text
+CNNs and Transformers use different normalization methods
+```
+
+because:
+- their architectures are very different.
+
+---
+
+# 📌 Main Difference
+
+| Architecture | Common Normalization |
+|---|---|
+| CNNs | Batch Normalization (BatchNorm) |
+| Transformers | Layer Normalization (LayerNorm) |
+
+---
+
+# 🧠 Why Different?
+
+CNNs process:
+- spatial image features
+
+Transformers process:
+- sequential/token embeddings
+
+Thus normalization dimensions differ.
+
+---
+
+# 🥇 1️⃣ Batch Normalization (CNNs)
+
+Used heavily in:
+- CNNs
+- ResNet
+- YOLO
+- EfficientNet
+
+---
+
+# 📐 BatchNorm Formula
+
+```text
+x_normalized = (x - μ_batch) / sqrt(σ_batch² + ε)
+```
+
+Then:
+
+```text
+y = γx_normalized + β
+```
+
+Where:
+
+| Symbol | Meaning |
+|---|---|
+| μ_batch | Batch mean |
+| σ_batch² | Batch variance |
+| γ | Learnable scale |
+| β | Learnable shift |
+
+---
+
+# 📌 How BatchNorm Works
+
+Normalization happens:
+
+```text
+across batch dimension
+```
+
+for each feature channel.
+
+---
+
+# 🏗️ CNN Tensor Shape
+
+```text
+(B, C, H, W)
+```
+
+Where:
+
+| Symbol | Meaning |
+|---|---|
+| B | Batch size |
+| C | Channels |
+| H | Height |
+| W | Width |
+
+---
+
+# 📌 BatchNorm Computes
+
+For each channel:
+
+```text
+mean and variance across:
+(B × H × W)
+```
+
+---
+
+# 🧠 Why It Works Well for CNNs
+
+CNNs usually use:
+- large batch sizes
+- stable spatial statistics
+
+Thus:
+- batch statistics become reliable.
+
+---
+
+# 🥈 2️⃣ Layer Normalization (Transformers)
+
+Used in:
+- Transformers
+- BERT
+- GPT
+- ViTs
+- LLMs
+
+---
+
+# 📐 LayerNorm Formula
+
+```text
+x_normalized = (x - μ_layer) / sqrt(σ_layer² + ε)
+```
+
+Then:
+
+```text
+y = γx_normalized + β
+```
+
+---
+
+# 📌 How LayerNorm Works
+
+Normalization happens:
+
+```text
+within each token embedding
+```
+
+NOT across batch.
+
+---
+
+# 🏗️ Transformer Tensor Shape
+
+```text
+(B, Seq_Length, Embedding_Dim)
+```
+
+Example:
+
+```text
+(32, 128, 768)
+```
+
+---
+
+# 📌 LayerNorm Computes
+
+For each token:
+
+```text
+mean and variance across embedding dimensions
+```
+
+Example:
+
+```text
+768 embedding values normalized together
+```
+
+---
+
+# 🧠 Why Transformers Use LayerNorm
+
+Transformers often:
+- use varying sequence lengths
+- use autoregressive generation
+- use small batch sizes
+
+Batch statistics become unstable.
+
+LayerNorm avoids this issue.
+
+---
+
+# 📊 Key Difference Table
+
+| Property | BatchNorm | LayerNorm |
+|---|---|---|
+| Used In | CNNs | Transformers |
+| Normalization Across | Batch | Features |
+| Depends on Batch Size | Yes | No |
+| Stable for Small Batch? | No | Yes |
+| Works in Inference Alone? | Uses running stats | Yes |
+| Good for Sequential Models? | Poor | Excellent |
+
+---
+
+# 🏗️ Visualization
+
+---
+
+# CNN + BatchNorm
+
+```text
+Across multiple images
+```
+
+```text
+Image1 Channel1
+Image2 Channel1
+Image3 Channel1
+        ↓
+Normalize Together
+```
+
+---
+
+# Transformer + LayerNorm
+
+```text
+Inside one token embedding
+```
+
+```text
+[0.2, -1.1, 0.5, ...]
+         ↓
+Normalize Internally
+```
+
+---
+
+# 📌 Why BatchNorm Fails in Transformers
+
+Transformers often train with:
+- variable sequence lengths
+- tiny batches
+- autoregressive decoding
+
+Batch statistics become:
+- noisy
+- unstable
+
+Thus LayerNorm works better.
+
+---
+
+# 📌 Pre-LN vs Post-LN Transformers
+
+Modern transformers often use:
+
+| Type | Description |
+|---|---|
+| Pre-LN | LayerNorm before attention/FFN |
+| Post-LN | LayerNorm after residual |
+
+Most modern LLMs use:
+- Pre-LN
+
+because:
+- better gradient stability
+
+---
+
+# 📌 RMSNorm (Modern LLMs)
+
+Recent models use:
+
+```text
+RMSNorm
+```
+
+instead of LayerNorm.
+
+Used in:
+- LLaMA
+- Mistral
+
+Reason:
+- computationally simpler
+- faster training
+
+---
+
+# 📐 RMSNorm Idea
+
+Uses:
+- root mean square normalization
+
+without:
+- subtracting mean
+
+---
+
+# 📊 CNN vs Transformer Pipeline
+
+---
+
+# CNN
+
+```text
+Conv
+ ↓
+BatchNorm
+ ↓
+ReLU
+```
+
+---
+
+# Transformer
+
+```text
+Attention
+ ↓
+Add
+ ↓
+LayerNorm
+```
+
+---
+
+# 🚘 Real Model Examples
+
+| Model | Normalization |
+|---|---|
+| ResNet | BatchNorm |
+| YOLOv5 | BatchNorm |
+| EfficientNet | BatchNorm |
+| BERT | LayerNorm |
+| GPT | LayerNorm |
+| LLaMA | RMSNorm |
+
+---
+
+# 🎤 Interview-Friendly Explanation
+
+> “CNNs typically use Batch Normalization, which normalizes activations across the batch dimension for each feature channel. Transformers instead use Layer Normalization, which normalizes across embedding dimensions within each token independently. LayerNorm works better for sequential architectures because it does not depend on batch statistics and remains stable for variable sequence lengths and small batch sizes.”
+
+
+
+# 🧠 RMSNorm Formula
+
+RMSNorm stands for:
+
+```text
+Root Mean Square Normalization
+```
+
+Used in modern LLMs like:
+- LLaMA
+- Mistral
+- Gemma
+
+---
+
+# 📐 RMSNorm Formula
+
+```text
+RMSNorm(x) = x / RMS(x) × γ
+```
+
+Where:
+
+```text
+RMS(x) = sqrt((1/n) × Σ(xᵢ²) + ε)
+```
+
+---
+
+# 📌 Full Expanded Formula
+
+```text
+RMSNorm(x) = x / sqrt((1/n) × Σ(xᵢ²) + ε) × γ
+```
+
+---
+
+# 📌 Symbols Meaning
+
+| Symbol | Meaning |
+|---|---|
+| x | Input vector |
+| n | Number of features |
+| Σ | Summation |
+| ε | Small stability constant |
+| γ | Learnable scaling parameter |
+
+---
+
+# 🧠 Key Difference from LayerNorm
+
+---
+
+# LayerNorm
+
+Uses:
+
+```text
+(x - mean) / std
+```
+
+It:
+- subtracts mean
+- divides by standard deviation
+
+---
+
+# RMSNorm
+
+Uses only:
+
+```text
+root mean square
+```
+
+It:
+- DOES NOT subtract mean
+- only scales magnitude
+
+---
+
+# 📊 RMSNorm vs LayerNorm
+
+| Property | LayerNorm | RMSNorm |
+|---|---|---|
+| Mean subtraction | Yes | No |
+| Variance normalization | Yes | Partial |
+| Computational cost | Higher | Lower |
+| Faster | No | Yes |
+| Used in modern LLMs | Sometimes | Very common |
+
+---
+
+# 🏗️ RMS Calculation Example
+
+Suppose:
+
+```text
+x = [2, 4]
+```
+
+---
+
+# Step 1️⃣ Square Values
+
+```text
+[4, 16]
+```
+
+---
+
+# Step 2️⃣ Mean of Squares
+
+```text
+(4 + 16) / 2 = 10
+```
+
+---
+
+# Step 3️⃣ Square Root
+
+```text
+sqrt(10) ≈ 3.16
+```
+
+---
+
+# Step 4️⃣ Normalize
+
+```text
+[2/3.16, 4/3.16]
+≈ [0.63, 1.26]
+```
+
+---
+
+# 📌 Why RMSNorm is Faster
+
+LayerNorm computes:
+- mean
+- variance
+- subtraction
+- normalization
+
+RMSNorm removes:
+- mean subtraction
+
+Thus:
+- fewer operations
+- faster training/inference
+
+---
+
+# 📌 Why Modern LLMs Prefer RMSNorm
+
+Large models require:
+- memory efficiency
+- faster computation
+- stable training
+
+RMSNorm provides:
+- similar performance
+- lower computational overhead
+
+---
+
+# 📌 Used In
+
+| Model | Normalization |
+|---|---|
+| GPT-2 | LayerNorm |
+| BERT | LayerNorm |
+| LLaMA | RMSNorm |
+| Mistral | RMSNorm |
+| Gemma | RMSNorm |
+
+---
+
+# 🏗️ Transformer Block with RMSNorm
+
+```text
+Input
+ ↓
+RMSNorm
+ ↓
+Attention
+ ↓
+Residual Add
+ ↓
+RMSNorm
+ ↓
+Feed Forward Network
+```
+
+---
+
+# 📌 Important Intuition
+
+RMSNorm mainly stabilizes:
+
+```text
+vector magnitude
+```
+
+instead of:
+- centering distribution around zero
+
+---
+
+# 📌 Why Mean Subtraction May Not Be Necessary
+
+In transformers:
+- residual connections already stabilize activations
+- strict centering often unnecessary
+
+Thus RMSNorm works surprisingly well.
+
+---
+
+# 🎤 Interview-Friendly Explanation
+
+> “RMSNorm, or Root Mean Square Normalization, normalizes activations using only the root mean square of the input without subtracting the mean. Compared to LayerNorm, it is computationally simpler and faster, which is why many modern LLMs such as LLaMA and Mistral use RMSNorm instead of LayerNorm.”
 
 
 
