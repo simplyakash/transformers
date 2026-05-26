@@ -316,26 +316,47 @@ Add positional embeddings:
     Input X
        │
  ┌─────▼─────┐
+ 
  │ LayerNorm │
+ 
  └─────┬─────┘
+      
        ↓
+       
  ┌───────────────┐
+ 
  │ Multi-Head    │
+ 
  │ Attention     │
+ 
  └─────┬─────────┘
+       
        ↓
+       
  Add Residual
+       
        ↓
+       
  ┌─────▼─────┐
+ 
  │ LayerNorm │
+ 
  └─────┬─────┘
+       
        ↓
+       
  ┌───────────────┐
+ 
  │ MLP (FFN)     │
+ 
  └─────┬─────────┘
+      
        ↓
+       
  Add Residual
+       
        ↓
+       
     Output
 
     
@@ -359,24 +380,39 @@ Split into heads:
 Per head:
 
  Q (197×64)
+     
       │
+      
       ▼
+ 
  QKᵀ → (197×197)
+ 
       │
+ 
  Scale (÷√64)
+ 
       │
+ 
  Softmax
+ 
       │
+      
       ▼
+ 
  × V (197×64)
+ 
       │
+      
       ▼
+ 
  Output (197×64)
 
  Concatenate heads:
+
 → (197 × 768)
 
 Final projection:
+
 → (197 × 768)
 
 
@@ -388,18 +424,30 @@ Input: (197 × 768)
 
 
   │
+
   ▼
 
   Linear (768 → 3072)
-│
-▼
+
+  │
+
+  ▼
+
 GELU
+
+
 │
+
 ▼
+
 Linear (3072 → 768)
+
 │
+
 ▼
+
 Output (197 × 768)
+
 
 
 ---
