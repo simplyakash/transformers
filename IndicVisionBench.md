@@ -563,3 +563,312 @@ WER = (0 + 1 + 1) / 4
 # 🎤 Interview-Friendly Explanation
 
 > “WER, or Word Error Rate, measures the percentage of incorrect words in predicted text compared to ground truth. It is calculated using substitutions, deletions, and insertions divided by the total number of ground truth words.”
+
+
+
+# 🧠 BLEU Score Example
+
+BLEU measures:
+
+```text
+how similar machine translation is to human reference translation
+```
+
+using:
+- word overlap
+- phrase overlap
+
+---
+
+# 📦 Example
+
+## Reference Translation
+
+```text
+"The cat is sitting on the mat"
+```
+
+---
+
+## Model Prediction
+
+```text
+"The cat sits on the mat"
+```
+
+---
+
+# 🥇 Step 1 — Unigram Matching
+
+Compare individual words.
+
+| Predicted Word | Present in Reference? |
+|---|---|
+| The | ✅ |
+| cat | ✅ |
+| sits | ❌ |
+| on | ✅ |
+| the | ✅ |
+| mat | ✅ |
+
+---
+
+# 📊 Unigram Precision
+
+Matching words:
+
+```text
+5
+```
+
+Total predicted words:
+
+```text
+6
+```
+
+Thus:
+
+```text
+Unigram Precision = 5 / 6 = 0.833
+```
+
+---
+
+# 🥈 Step 2 — Bigram Matching
+
+Predicted bigrams:
+
+```text
+"The cat"
+"cat sits"
+"sits on"
+"on the"
+"the mat"
+```
+
+---
+
+# 📌 Matching Bigrams
+
+Reference contains:
+
+```text
+"The cat"
+"on the"
+"the mat"
+```
+
+Matching bigrams:
+
+```text
+3
+```
+
+Total predicted bigrams:
+
+```text
+5
+```
+
+---
+
+# 📊 Bigram Precision
+
+```text
+3 / 5 = 0.6
+```
+
+---
+
+# 🥉 BLEU Combines Multiple n-grams
+
+BLEU combines:
+- unigram
+- bigram
+- trigram
+- 4-gram scores
+
+using:
+- geometric mean
+- brevity penalty
+
+---
+
+# 📌 Final Interpretation
+
+Prediction is:
+
+```text
+mostly correct
+```
+
+So:
+- BLEU score becomes reasonably high.
+
+---
+
+# 📊 BLEU Score Intuition
+
+| BLEU | Quality |
+|---|---|
+| 1.0 | Perfect translation |
+| > 0.7 | Excellent |
+| 0.4 – 0.7 | Good |
+| < 0.2 | Poor |
+
+---
+
+# ⚠️ Limitation
+
+BLEU checks:
+- overlap
+
+not:
+- true semantic understanding
+
+Thus:
+- semantically correct sentences may still get lower BLEU.
+
+---
+
+# 🎤 Interview-Friendly Explanation
+
+> “BLEU score evaluates translation quality by measuring n-gram overlap between machine-generated translation and human reference translation. It computes precision over matching phrases and combines unigram to 4-gram similarities to produce the final score.”
+
+# 🧠 RIBES Score
+
+RIBES stands for:
+
+```text
+Rank-based Intuitive Bilingual Evaluation Score
+```
+
+It is a machine translation metric that focuses on:
+
+```text
+word order correctness
+```
+
+and:
+- sentence fluency
+
+---
+
+# 📌 Why RIBES is Needed
+
+BLEU mainly checks:
+- word overlap
+
+But languages like:
+- Hindi
+- Japanese
+- Indic languages
+
+depend heavily on:
+- correct word ordering
+
+Thus RIBES was introduced.
+
+---
+
+# 📦 Example
+
+## Reference Translation
+
+```text
+"I eat mango daily"
+```
+
+---
+
+## Prediction 1
+
+```text
+"I eat mango daily"
+```
+
+Perfect order:
+- high RIBES
+
+---
+
+## Prediction 2
+
+```text
+"daily mango eat I"
+```
+
+Same words:
+- but wrong order
+
+BLEU may still give:
+- moderate score
+
+But RIBES gives:
+- low score
+
+because:
+- word ranking/order is incorrect.
+
+---
+
+# 🧠 Core Idea
+
+RIBES measures:
+
+```text
+how well word order in prediction matches reference
+```
+
+using:
+- rank correlation
+- word alignment ordering
+
+---
+
+# 📊 What RIBES Evaluates
+
+| Aspect | Importance |
+|---|---|
+| Word Order | Very High |
+| Fluency | High |
+| Correct Phrase Structure | High |
+| Exact Word Matching | Moderate |
+
+---
+
+# 📌 RIBES Range
+
+| Score | Meaning |
+|---|---|
+| 1.0 | Perfect translation/order |
+| High | Good fluency |
+| Low | Poor sentence structure |
+
+---
+
+# 📌 Why Useful for Indic Languages
+
+Many Indic languages have:
+- flexible grammar
+- rich morphology
+- different sentence structures
+
+Thus:
+- preserving proper word order becomes important.
+
+---
+
+# 📊 BLEU vs RIBES
+
+| Metric | Focus |
+|---|---|
+| BLEU | Word overlap |
+| RIBES | Word order and fluency |
+
+---
+
+# 🎤 Interview-Friendly Explanation
+
+> “RIBES is a machine translation evaluation metric that focuses on word order and sentence fluency using rank correlation. Unlike BLEU, which mainly measures n-gram overlap, RIBES evaluates whether translated words appear in the correct relative order, making it especially useful for multilingual and Indic language translation tasks.”
