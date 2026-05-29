@@ -272,3 +272,294 @@ Performance gaps observed across:
 # 🎤 Interview-Friendly Summary
 
 > “IndicVisionBench evaluates Vision-Language Models across OCR, Multimodal Machine Translation, and Visual Question Answering tasks using task-specific benchmarking metrics. OCR uses ANLS, WER, and CER; MMT uses BLEU and RIBES; and VQA combines Exact Match with GPT-4o-based judge scoring for contextual and cultural evaluation. The benchmark compares proprietary and open-weight VLMs across multilingual Indic settings.”
+
+# 🧠 ANLS (Average Normalized Levenshtein Similarity)
+
+ANLS is an OCR evaluation metric used to measure:
+
+```text
+how similar predicted text is to ground truth text
+```
+
+It is widely used because:
+- small OCR mistakes are tolerated
+- partial matches are rewarded
+
+---
+
+# 📌 Core Idea
+
+ANLS is based on:
+
+```text
+Levenshtein Distance
+```
+
+which counts:
+- insertions
+- deletions
+- substitutions
+
+needed to convert one string into another.
+
+---
+
+# 📐 Formula
+
+```text
+ANLS = 1 - (Levenshtein Distance / Max String Length)
+
+
+```
+Max String Length=max(len(word),len(GT) )
+
+---
+
+# 📦 Example
+
+## Ground Truth
+
+```text
+"amazon"
+```
+
+---
+
+## OCR Prediction
+
+```text
+"amaz0n"
+```
+
+Difference:
+- `o → 0`
+
+Only:
+- 1 substitution
+
+Thus:
+
+```text
+Levenshtein Distance = 1
+```
+
+Maximum string length:
+
+```text
+7
+```
+
+---
+
+# 📊 ANLS Calculation
+
+```text
+ANLS = 1 - (1 / 7)
+     = 0.857
+```
+
+---
+
+# 📌 Interpretation
+
+| ANLS Score | Meaning |
+|---|---|
+| 1.0 | Perfect OCR |
+| 0.8+ | Good OCR |
+| 0.5 | Partial match |
+| 0 | Completely wrong |
+
+---
+
+# 🧠 Why ANLS is Better Than Exact Match
+
+Exact Match:
+
+```text
+amazon ≠ amaz0n
+```
+
+would give:
+
+```text
+0
+```
+
+even though prediction is almost correct.
+
+ANLS instead gives:
+- partial credit
+
+making it more robust for OCR evaluation.
+
+---
+
+# 📌 Common OCR Errors Handled
+
+| Error Type | Example |
+|---|---|
+| Character substitution | O ↔ 0 |
+| Missing character | amazn |
+| Extra character | amazoon |
+| Minor spelling issue | amzon |
+
+---
+
+
+
+# 🎤 Interview-Friendly Explanation
+
+> “ANLS, or Average Normalized Levenshtein Similarity, measures OCR quality by comparing predicted text with ground truth using edit distance. Unlike exact match, it gives partial credit for near-correct predictions, making it more robust for OCR evaluation.”
+
+
+# 🧠 Word Error Rate (WER)
+
+WER measures:
+
+```text
+how many words are incorrect in predicted text
+```
+
+It is widely used in:
+- OCR
+- speech recognition
+- transcription systems
+
+---
+
+# 📐 Formula
+
+```text
+WER = (S + D + I) / N
+```
+
+Where:
+
+| Symbol | Meaning |
+|---|---|
+| S | Substitutions |
+| D | Deletions |
+| I | Insertions |
+| N | Total words in ground truth |
+
+---
+
+# 📦 Example
+
+## Ground Truth
+
+```text
+"the cat is black"
+```
+
+---
+
+## Prediction
+
+```text
+"the cat black"
+```
+
+Missing word:
+
+```text
+"is"
+```
+
+Thus:
+
+| Error Type | Count |
+|---|---|
+| Deletions (D) | 1 |
+| Substitutions (S) | 0 |
+| Insertions (I) | 0 |
+
+Total ground truth words:
+
+```text
+4
+```
+
+---
+
+# 📊 WER Calculation
+
+```text
+WER = (0 + 1 + 0) / 4
+    = 0.25
+```
+
+---
+
+# 📌 Interpretation
+
+```text
+25% word error
+```
+
+---
+
+# 📌 WER Range
+
+| WER | Quality |
+|---|---|
+| 0 | Perfect prediction |
+| Low WER | Better system |
+| High WER | Poor prediction |
+
+---
+
+# 🧠 Error Types
+
+| Error | Example |
+|---|---|
+| Substitution | cat → bat |
+| Deletion | missing word |
+| Insertion | extra word added |
+
+---
+
+# 📌 Example with All Errors
+
+## Ground Truth
+
+```text
+"amazon is growing fast"
+```
+
+---
+
+## Prediction
+
+```text
+"amazon growing very fast"
+```
+
+Errors:
+
+| Type | Example |
+|---|---|
+| Deletion | "is" removed |
+| Insertion | "very" added |
+
+Thus:
+
+```text
+WER = (0 + 1 + 1) / 4
+    = 0.5
+```
+
+---
+
+# 📌 Difference Between WER and CER
+
+| Metric | Unit |
+|---|---|
+| WER | Word-level errors |
+| CER | Character-level errors |
+
+---
+
+# 🎤 Interview-Friendly Explanation
+
+> “WER, or Word Error Rate, measures the percentage of incorrect words in predicted text compared to ground truth. It is calculated using substitutions, deletions, and insertions divided by the total number of ground truth words.”
