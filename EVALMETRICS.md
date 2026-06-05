@@ -341,3 +341,863 @@ No single metric is enough.
 
 Automatic metrics (fast, scalable)
 Human judgment (accurate, nuanced)
+
+
+
+# Batch Normalization vs Layer Normalization
+
+The easiest way to understand the difference is to see **which values are used to calculate the mean and variance**.
+
+---
+
+# Example Input
+
+Suppose a neural network layer produces the following output:
+
+| Sample | Feature 1 | Feature 2 | Feature 3 |
+|----------|----------|----------|----------|
+| A | 2 | 4 | 6 |
+| B | 8 | 10 | 12 |
+
+Shape:
+
+```text
+(batch_size = 2, features = 3)
+```
+
+```text
+[
+ [ 2,  4,  6],
+ [ 8, 10, 12]
+]
+```
+
+---
+
+# 1. Batch Normalization (BatchNorm)
+
+BatchNorm normalizes **each feature across all samples in the batch**.
+
+## Feature 1
+
+Values:
+
+```text
+[2, 8]
+```
+
+Mean:
+
+μ = (2 + 8) / 2 = 5
+
+Variance:
+
+σ² = ((2 - 5)² + (8 - 5)²) / 2
+   = (9 + 9) / 2
+   = 9
+
+Standard Deviation:
+
+σ = 3
+
+Normalized Values:
+
+```text
+(2 - 5) / 3 = -1
+(8 - 5) / 3 =  1
+```
+
+Result:
+
+```text
+[-1, 1]
+```
+
+---
+
+## Feature 2
+
+Values:
+
+```text
+[4, 10]
+```
+
+Mean = 7
+
+Std = 3
+
+Normalized:
+
+```text
+[-1, 1]
+```
+
+---
+
+## Feature 3
+
+Values:
+
+```text
+[6, 12]
+```
+
+Mean = 9
+
+Std = 3
+
+Normalized:
+
+```text
+[-1, 1]
+```
+
+---
+
+## Final BatchNorm Output
+
+| Sample | F1 | F2 | F3 |
+|----------|----------|----------|----------|
+| A | -1 | -1 | -1 |
+| B | 1 | 1 | 1 |
+
+---
+
+## Visualization
+
+BatchNorm looks **vertically** across the batch:
+
+```text
+Feature1  [2, 8]
+Feature2  [4,10]
+Feature3  [6,12]
+           ↑
+     normalize here
+```
+
+BatchNorm asks:
+
+> "For Feature 1, how does each sample compare to the other samples in the batch?"
+
+---
+
+# 2. Layer Normalization (LayerNorm)
+
+LayerNorm normalizes **all features inside a single sample**.
+
+---
+
+## Sample A
+
+Values:
+
+```text
+[2, 4, 6]
+```
+
+Mean:
+
+μ = (2 + 4 + 6) / 3
+  = 4
+
+Variance:
+
+σ² = ((2 - 4)² + (4 - 4)² + (6 - 4)²) / 3
+   = (4 + 0 + 4) / 3
+   = 8/3
+
+Standard Deviation:
+
+σ ≈ 1.633
+
+Normalized:
+
+```text
+(2 - 4) / 1.633 ≈ -1.225
+(4 - 4) / 1.633 = 0
+(6 - 4) / 1.633 ≈ 1.225
+```
+
+Result:
+
+```text
+[-1.225, 0, 1.225]
+```
+
+---
+
+## Sample B
+
+Values:
+
+```text
+[8, 10, 12]
+```
+
+Mean = 10
+
+Std ≈ 1.633
+
+Normalized:
+
+```text
+[-1.225, 0, 1.225]
+```
+
+---
+
+## Final LayerNorm Output
+
+| Sample | F1 | F2 | F3 |
+|----------|----------|----------|----------|
+| A | -1.225 | 0 | 1.225 |
+| B | -1.225 | 0 | 1.225 |
+
+---
+
+## Visualization
+
+LayerNorm looks **horizontally** across features:
+
+```text
+Sample A [2, 4, 6]
+          ↑
+ normalize here
+
+Sample B [8,10,12]
+          ↑
+ normalize here
+```
+
+LayerNorm asks:
+
+> "Within this sample, how does each feature compare to the other features?"
+
+---
+
+# Mathematical Difference
+
+## BatchNorm
+
+For feature j:
+
+μⱼ = (1/m) Σ xᵢⱼ
+
+σ²ⱼ = (1/m) Σ (xᵢⱼ − μⱼ)²
+
+Where:
+
+- m = batch size
+- j = feature index
+
+Normalization:
+
+x̂ᵢⱼ = (xᵢⱼ − μⱼ) / √(σ²ⱼ + ε)
+
+Statistics are computed using **other samples in the batch**.
+
+---
+
+## LayerNorm
+
+For sample i:
+
+μᵢ = (1/d) Σ xᵢⱼ
+
+σ²ᵢ = (1/d) Σ (xᵢⱼ − μᵢ)²
+
+Where:
+
+- d = number of features
+- i = sample index
+
+Normalization:
+
+x̂ᵢⱼ = (xᵢⱼ − μᵢ) / √(σ²ᵢ + ε)
+
+Statistics are computed using **features from the same sample**.
+
+---
+
+# Why CNNs Use BatchNorm
+
+CNNs usually train with:
+
+```text
+Batch Size = 32
+Batch Size = 64
+Batch Size = 128
+```
+
+Large batches provide reliable statistics.
+
+Benefits:
+
+✓ Faster convergence
+
+✓ More stable gradients
+
+✓ Acts as a regularizer
+
+✓ Works very well in computer vision
+
+---
+
+# Why Transformers Use LayerNorm
+
+Consider a sentence:
+
+```text
+"I love AI"
+```
+
+During inference:
+
+```text
+Batch Size = 1
+```
+
+During training:
+
+```text
+Batch Size = 8
+Batch Size = 32
+Batch Size = 128
+```
+
+If BatchNorm were used:
+
+- Statistics change when batch size changes
+- Output depends on other examples in the batch
+- Difficult for variable-length sequences
+
+LayerNorm solves this because:
+
+- Every token is normalized independently
+- Works even when batch size = 1
+- Stable for NLP and transformers
+
+---
+
+# Transformer Example
+
+Suppose a token embedding is:
+
+```text
+[1.2, 0.5, -0.8, 2.1]
+```
+
+LayerNorm computes:
+
+```text
+mean(token)
+variance(token)
+```
+
+using only these 4 numbers.
+
+It does not care what other tokens or other sentences are doing.
+
+This makes it ideal for transformers.
+
+---
+
+# Learnable Parameters
+
+Both BatchNorm and LayerNorm contain learnable parameters:
+
+γ (gamma) → scale
+
+β (beta) → shift
+
+Final output:
+
+x̂ = γ × normalized(x) + β
+
+This allows the network to learn the best scaling after normalization.
+
+---
+
+# Interview Summary
+
+| Property | BatchNorm | LayerNorm |
+|-----------|-----------|-----------|
+| Statistics Computed Across | Batch | Features |
+| Depends On Other Samples | Yes | No |
+| Works With Batch Size = 1 | Poorly | Yes |
+| Commonly Used In | CNNs | Transformers |
+| Training/Inference Behavior | Different | Same |
+| NLP Friendly | No | Yes |
+| Vision Friendly | Excellent | Good |
+
+---
+
+# Memory Trick
+
+```text
+BatchNorm
+    ↓
+Normalize DOWN the batch
+(Vertical)
+
+LayerNorm
+    →
+Normalize ACROSS features
+(Horizontal)
+```
+
+---
+
+# One-Line Interview Answer
+
+BatchNorm normalizes each feature using statistics from all samples in a batch, while LayerNorm normalizes each sample using statistics from all features within that sample.
+
+
+# BatchNorm vs LayerNorm Using a Real Neural Network Example
+
+Suppose we have a neural network:
+
+```text
+Input Layer
+    ↓
+Hidden Layer 1 (7 neurons)
+    ↓
+Hidden Layer 2 (5 neurons)
+    ↓
+Output
+```
+
+Let's say we process a batch of 3 samples.
+
+---
+
+# Hidden Layer 1 Output (7 Neurons)
+
+After the first linear layer, suppose we get:
+
+| Sample | N1 | N2 | N3 | N4 | N5 | N6 | N7 |
+|----------|----|----|----|----|----|----|----|
+| S1 | 10 | 20 | 30 | 40 | 50 | 60 | 70 |
+| S2 | 15 | 25 | 35 | 45 | 55 | 65 | 75 |
+| S3 | 20 | 30 | 40 | 50 | 60 | 70 | 80 |
+
+Shape:
+
+```text
+(batch_size = 3, hidden_dim = 7)
+```
+
+```text
+[
+ [10,20,30,40,50,60,70],
+ [15,25,35,45,55,65,75],
+ [20,30,40,50,60,70,80]
+]
+```
+
+---
+
+# How BatchNorm Works
+
+BatchNorm looks at one neuron at a time.
+
+For Neuron N1:
+
+```text
+[10,15,20]
+```
+
+These values came from:
+
+```text
+S1 → N1 = 10
+S2 → N1 = 15
+S3 → N1 = 20
+```
+
+Mean:
+
+```text
+μ = (10 + 15 + 20)/3
+  = 15
+```
+
+Std:
+
+```text
+σ ≈ 4.08
+```
+
+Normalized:
+
+```text
+(10-15)/4.08 ≈ -1.22
+(15-15)/4.08 = 0
+(20-15)/4.08 ≈ 1.22
+```
+
+Result:
+
+```text
+[-1.22, 0, 1.22]
+```
+
+---
+
+Now Neuron N2:
+
+```text
+[20,25,30]
+```
+
+Mean:
+
+```text
+25
+```
+
+Std:
+
+```text
+4.08
+```
+
+Normalized:
+
+```text
+[-1.22,0,1.22]
+```
+
+---
+
+BatchNorm repeats this for:
+
+```text
+N1
+N2
+N3
+N4
+N5
+N6
+N7
+```
+
+independently.
+
+---
+
+# Visualization of BatchNorm
+
+```text
+        N1   N2   N3   N4   N5   N6   N7
+S1      10   20   30   40   50   60   70
+S2      15   25   35   45   55   65   75
+S3      20   30   40   50   60   70   80
+
+        ↑
+        │
+Normalize column-wise
+```
+
+BatchNorm asks:
+
+> "For neuron N1, what is the mean and variance across all samples?"
+
+---
+
+# How LayerNorm Works
+
+LayerNorm looks at one sample at a time.
+
+Take Sample S1:
+
+```text
+[10,20,30,40,50,60,70]
+```
+
+Mean:
+
+```text
+μ = (10+20+30+40+50+60+70)/7
+  = 40
+```
+
+Variance:
+
+```text
+σ² = 400
+```
+
+Std:
+
+```text
+σ = 20
+```
+
+Normalized:
+
+```text
+(10-40)/20 = -1.5
+(20-40)/20 = -1.0
+(30-40)/20 = -0.5
+(40-40)/20 = 0
+(50-40)/20 = 0.5
+(60-40)/20 = 1.0
+(70-40)/20 = 1.5
+```
+
+Result:
+
+```text
+[-1.5,-1,-0.5,0,0.5,1,1.5]
+```
+
+---
+
+For Sample S2:
+
+```text
+[15,25,35,45,55,65,75]
+```
+
+Mean:
+
+```text
+45
+```
+
+Std:
+
+```text
+20
+```
+
+Normalized:
+
+```text
+[-1.5,-1,-0.5,0,0.5,1,1.5]
+```
+
+---
+
+For Sample S3:
+
+```text
+[20,30,40,50,60,70,80]
+```
+
+Mean:
+
+```text
+50
+```
+
+Std:
+
+```text
+20
+```
+
+Normalized:
+
+```text
+[-1.5,-1,-0.5,0,0.5,1,1.5]
+```
+
+---
+
+# Visualization of LayerNorm
+
+```text
+        N1   N2   N3   N4   N5   N6   N7
+S1      10   20   30   40   50   60   70
+         ←──── Normalize ────→
+
+S2      15   25   35   45   55   65   75
+         ←──── Normalize ────→
+
+S3      20   30   40   50   60   70   80
+         ←──── Normalize ────→
+```
+
+LayerNorm asks:
+
+> "Inside this sample, how do the 7 neurons compare to each other?"
+
+---
+
+# Now Hidden Layer 2 (5 Neurons)
+
+Suppose after the next layer we get:
+
+```text
+[
+ [2, 4, 6, 8,10],
+ [3, 5, 7, 9,11],
+ [4, 6, 8,10,12]
+]
+```
+
+Shape:
+
+```text
+(batch_size = 3, hidden_dim = 5)
+```
+
+Exactly the same rules apply.
+
+---
+
+## BatchNorm
+
+Normalize each column:
+
+```text
+Neuron1 → [2,3,4]
+Neuron2 → [4,5,6]
+Neuron3 → [6,7,8]
+Neuron4 → [8,9,10]
+Neuron5 → [10,11,12]
+```
+
+Column-wise normalization.
+
+---
+
+## LayerNorm
+
+Normalize each row:
+
+```text
+Sample1 → [2,4,6,8,10]
+Sample2 → [3,5,7,9,11]
+Sample3 → [4,6,8,10,12]
+```
+
+Row-wise normalization.
+
+---
+
+# Why Transformers Prefer LayerNorm
+
+Consider a transformer token embedding:
+
+```text
+Token "cat"
+
+[0.12, 1.45, -0.88, 2.11, 0.43, ...]
+```
+
+For GPT-like models:
+
+```text
+hidden_size = 4096
+```
+
+So one token may look like:
+
+```text
+[4096 numbers]
+```
+
+LayerNorm computes:
+
+```text
+mean(4096 numbers)
+variance(4096 numbers)
+```
+
+for that token only.
+
+It does not need:
+
+- Other sentences
+- Other tokens
+- Large batches
+
+Therefore it works perfectly during inference when:
+
+```text
+batch_size = 1
+```
+
+which is exactly how ChatGPT-like models generate text.
+
+---
+
+# Intuition
+
+Imagine a classroom.
+
+### BatchNorm
+
+Compare students by subject.
+
+```text
+Math Scores
+
+A = 60
+B = 80
+C = 90
+```
+
+Mean is computed across students.
+
+Question:
+
+"How good is student A compared to other students in Math?"
+
+---
+
+### LayerNorm
+
+Compare subjects within one student.
+
+```text
+Student A
+
+Math    = 60
+Science = 80
+English = 90
+History = 70
+```
+
+Mean is computed across subjects.
+
+Question:
+
+"Which subjects are strong or weak for this student?"
+
+---
+
+# Ultimate Memory Trick
+
+```text
+BatchNorm
+─────────
+Same Neuron
+Across Many Samples
+
+Column-wise
+Vertical
+
+        ↓
+        ↓
+        ↓
+
+
+LayerNorm
+─────────
+Same Sample
+Across Many Neurons
+
+Row-wise
+Horizontal
+
+←────────────→
+```
+
+**BatchNorm = Normalize columns**
+
+**LayerNorm = Normalize rows**
