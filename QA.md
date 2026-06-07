@@ -1810,3 +1810,2019 @@ because memory becomes the bottleneck.
 # 🎤 Interview Answer
 
 > "HNSW uses a hierarchical graph where vectors are connected to their nearest neighbors, allowing logarithmic-time graph traversal instead of linear scanning. IVF partitions vectors into clusters and searches only the most relevant clusters. PQ compresses vectors into compact codes to reduce memory usage. HNSW typically provides the best recall and latency for enterprise RAG, while IVF-PQ is preferred when datasets grow to billions of embeddings."
+
+
+# Self-Attention vs Cross-Attention
+
+The easiest way to understand the difference is:
+
+```text
+Self-Attention
+Q, K, V come from the SAME sequence
+
+Cross-Attention
+Q comes from one sequence
+K, V come from another sequence
+```
+
+---
+
+# 1. Self-Attention
+
+Suppose we have a sentence:
+
+```text
+"I love AI"
+```
+
+Tokens:
+
+```text
+[I] [love] [AI]
+```
+
+Embeddings:
+
+```text
+I    → e1
+love → e2
+AI   → e3
+```
+
+---
+
+## Step 1: Create Q, K, V
+
+For every token:
+
+```text
+Q = XWQ
+K = XWK
+V = XWV
+```
+
+So:
+
+```text
+I    → q1, k1, v1
+love → q2, k2, v2
+AI   → q3, k3, v3
+```
+
+---
+
+## Step 2: Attention for Token "love"
+
+Token "love" asks:
+
+```text
+Which tokens should I pay attention to?
+```
+
+It computes:
+
+```text
+q2·k1
+q2·k2
+q2·k3
+```
+
+Result:
+
+```text
+love ↔ I
+love ↔ love
+love ↔ AI
+```
+
+---
+
+## Visualization
+
+```text
+Sentence
+
+[I] [love] [AI]
+
+ ↑     ↑      ↑
+ │     │      │
+ └─────┼──────┘
+
+Every token can look at
+every other token.
+```
+
+---
+
+## Why Called Self-Attention?
+
+Because:
+
+```text
+Q, K, V
+all come from the same sentence.
+```
+
+```text
+Input Sequence
+      ↓
+Generate Q,K,V
+      ↓
+Attend to itself
+```
+
+---
+
+# Example
+
+Sentence:
+
+```text
+"The animal didn't cross the road because it was tired."
+```
+
+For token:
+
+```text
+"it"
+```
+
+Self-attention helps determine:
+
+```text
+it → animal
+```
+
+by attending to earlier words.
+
+---
+
+# Mathematical Formula
+
+Attention scores:
+
+```text
+Score = QKᵀ
+```
+
+Scaled:
+
+```text
+Score = QKᵀ / √dk
+```
+
+Softmax:
+
+```text
+Attention Weights = softmax(QKᵀ / √dk)
+```
+
+Output:
+
+```text
+Attention(Q,K,V)
+=
+softmax(QKᵀ / √dk)V
+```
+
+:contentReference[oaicite:0]{index=0}
+
+---
+
+# 2. Cross-Attention
+
+Now suppose we are translating:
+
+```text
+English:
+"I love AI"
+
+French:
+"J'aime l'IA"
+```
+
+---
+
+## Encoder Output
+
+Encoder processes:
+
+```text
+[I] [love] [AI]
+```
+
+Produces:
+
+```text
+Encoder Hidden States
+h1 h2 h3
+```
+
+These become:
+
+```text
+K = encoder output
+V = encoder output
+```
+
+---
+
+## Decoder
+
+Decoder currently generated:
+
+```text
+"J'aime"
+```
+
+and wants next word.
+
+Decoder state becomes:
+
+```text
+Q = decoder hidden state
+```
+
+---
+
+Now:
+
+```text
+Q → Decoder
+K → Encoder
+V → Encoder
+```
+
+This is Cross-Attention.
+
+---
+
+## Visualization
+
+```text
+Encoder
+
+[I] [love] [AI]
+ │     │      │
+ ▼     ▼      ▼
+K1    K2     K3
+V1    V2     V3
+
+        ▲
+        │
+        │
+Decoder Query
+```
+
+Decoder looks at encoder outputs.
+
+---
+
+# Why Called Cross-Attention?
+
+Because attention happens across two different sequences.
+
+```text
+Decoder Sequence
+       ↓
+       Q
+
+Encoder Sequence
+       ↓
+      K,V
+```
+
+Different sources.
+
+---
+
+# Real Example
+
+Suppose:
+
+```text
+English:
+"The cat is sleeping."
+```
+
+Decoder wants to generate:
+
+```text
+"chat"
+```
+
+Cross-attention allows decoder to focus on:
+
+```text
+cat ↔ chat
+```
+
+inside encoder outputs.
+
+---
+
+# Q, K, V Comparison
+
+## Self-Attention
+
+```text
+Sentence:
+"I love AI"
+
+Q ← sentence
+K ← sentence
+V ← sentence
+```
+
+```text
+Same source
+```
+
+---
+
+## Cross-Attention
+
+```text
+Encoder:
+"I love AI"
+
+Decoder:
+"J'aime"
+```
+
+```text
+Q ← decoder
+K ← encoder
+V ← encoder
+```
+
+```text
+Different sources
+```
+
+---
+
+# In Transformers
+
+## Encoder Block
+
+Contains:
+
+```text
+Self-Attention
+```
+
+because encoder only needs to understand its own input.
+
+```text
+Input
+  ↓
+Self-Attention
+  ↓
+Feed Forward
+```
+
+---
+
+## Decoder Block
+
+Contains:
+
+```text
+1. Masked Self-Attention
+2. Cross-Attention
+3. Feed Forward
+```
+
+```text
+Decoder Input
+      ↓
+Masked Self-Attention
+      ↓
+Cross-Attention
+      ↓
+Feed Forward
+```
+
+---
+
+# GPT vs Encoder-Decoder Models
+
+## GPT
+
+Uses:
+
+```text
+Masked Self-Attention Only
+```
+
+No encoder exists.
+
+```text
+Q,K,V
+all from same sequence
+```
+
+Therefore:
+
+```text
+No Cross-Attention
+```
+
+---
+
+## T5
+
+Uses:
+
+```text
+Encoder Self-Attention
+Decoder Self-Attention
+Decoder Cross-Attention
+```
+
+---
+
+## BERT
+
+Uses:
+
+```text
+Self-Attention Only
+```
+
+No decoder.
+
+---
+
+# Vision-Language Models
+
+Cross-attention is extremely common.
+
+Example:
+
+Image:
+
+```text
+🐱 on sofa
+```
+
+Text:
+
+```text
+"A cat sitting on a sofa"
+```
+
+Image encoder produces:
+
+```text
+Image Features
+```
+
+Text decoder produces:
+
+```text
+Queries
+```
+
+Cross-attention:
+
+```text
+Q ← text
+K,V ← image
+```
+
+This allows the text model to look at image regions.
+
+---
+
+# Interview Table
+
+| Property | Self-Attention | Cross-Attention |
+|------------|------------|------------|
+| Q Source | Same Sequence | Decoder Sequence |
+| K Source | Same Sequence | Encoder Sequence |
+| V Source | Same Sequence | Encoder Sequence |
+| Number of Inputs | One | Two |
+| Used in Encoder | Yes | No |
+| Used in Decoder | Yes | Yes |
+| GPT Uses | Yes | No |
+| T5 Uses | Yes | Yes |
+| Image-Text Models | Sometimes | Very Common |
+
+---
+
+# Memory Trick
+
+```text
+Self-Attention
+
+Sentence talks to itself
+
+[I] [love] [AI]
+
+ ↑    ↑    ↑
+ └────┼────┘
+
+Same sequence
+```
+
+```text
+Cross-Attention
+
+Decoder talks to Encoder
+
+Decoder
+   ↓
+   Q
+
+Encoder
+   ↓
+  K,V
+
+Different sequences
+```
+
+---
+
+# One-Line Interview Answer
+
+**Self-attention uses Q, K, and V from the same sequence, allowing tokens to attend to other tokens within that sequence. Cross-attention uses Q from one sequence and K,V from another sequence, allowing one sequence to attend to information from a different sequence.**
+
+
+# Transformer Architecture — Complete Overview
+
+A Transformer consists of the following major components:
+
+```text
+Input Tokens
+      ↓
+Token Embeddings
+      ↓
+Positional Encoding
+      ↓
+Multi-Head Self-Attention
+      ↓
+Add & LayerNorm
+      ↓
+Feed Forward Network
+      ↓
+Add & LayerNorm
+      ↓
+(Repeat N Times)
+      ↓
+Linear Layer
+      ↓
+Softmax
+      ↓
+Output Token
+```
+
+For Encoder-Decoder Transformers (Translation Models), there is also:
+
+```text
+Encoder Output
+      ↓
+Cross-Attention
+      ↓
+Decoder
+```
+
+---
+
+# 1. Token Embedding
+
+Neural networks cannot understand words directly.
+
+Words are converted into dense vectors.
+
+Example:
+
+```text
+"I"    → [0.2, 0.5, -0.1, 0.8]
+"love" → [0.7, 1.2, 0.3, -0.4]
+"AI"   → [1.1, -0.5, 0.9, 0.6]
+```
+
+Input:
+
+```text
+"I love AI"
+```
+
+Token IDs:
+
+```text
+[15, 204, 87]
+```
+
+Embeddings:
+
+```text
+[
+ [0.2, 0.5, -0.1, 0.8],
+ [0.7, 1.2, 0.3, -0.4],
+ [1.1,-0.5, 0.9, 0.6]
+]
+```
+
+Shape:
+
+```text
+(sequence_length, d_model)
+```
+
+Example:
+
+```text
+(3, 768)
+```
+
+---
+
+# 2. Positional Encoding
+
+Attention has no idea about word order.
+
+These sentences contain the same words:
+
+```text
+Dog bites man
+```
+
+```text
+Man bites dog
+```
+
+Without position information they look similar.
+
+Therefore position information is added.
+
+```text
+Final Input
+=
+Token Embedding
++
+Position Encoding
+```
+
+Example:
+
+```text
+Embedding: [0.5, 1.0, 0.3]
+Position : [0.1, 0.2, 0.3]
+--------------------------------
+Final    : [0.6, 1.2, 0.6]
+```
+
+Modern LLMs often use:
+
+```text
+RoPE (Rotary Positional Encoding)
+```
+
+instead of sinusoidal encodings.
+
+---
+
+# 3. Query, Key and Value (Q, K, V)
+
+Each token produces:
+
+```text
+Query (Q)
+Key   (K)
+Value (V)
+```
+
+Using learned matrices:
+
+```text
+Q = XWQ
+K = XWK
+V = XWV
+```
+
+Example:
+
+```text
+Token: "love"
+
+Embedding
+     ↓
+
+Q = [1.2, 0.5]
+K = [0.8, 1.1]
+V = [0.4, 2.0]
+```
+
+---
+
+## Intuition
+
+### Query
+
+Asks:
+
+```text
+What information am I looking for?
+```
+
+### Key
+
+Says:
+
+```text
+What information do I contain?
+```
+
+### Value
+
+Contains:
+
+```text
+Actual information to pass forward.
+```
+
+---
+
+# 4. Self-Attention
+
+Consider:
+
+```text
+[I] [love] [AI]
+```
+
+The token:
+
+```text
+love
+```
+
+looks at:
+
+```text
+I
+love
+AI
+```
+
+to determine what is important.
+
+---
+
+## Step 1
+
+Compute similarity:
+
+```text
+Q × Kᵀ
+```
+
+Example:
+
+```text
+love ↔ I
+love ↔ love
+love ↔ AI
+```
+
+Scores:
+
+```text
+[1.2, 3.5, 2.1]
+```
+
+---
+
+## Step 2
+
+Scale:
+
+```text
+Scores / √dk
+```
+
+Purpose:
+
+```text
+Prevent extremely large values.
+```
+
+---
+
+## Step 3
+
+Softmax:
+
+```text
+[1.2,3.5,2.1]
+
+↓
+
+[0.08,0.74,0.18]
+```
+
+Now scores sum to:
+
+```text
+1
+```
+
+---
+
+## Step 4
+
+Weighted sum:
+
+```text
+Attention Weights
+        ×
+Values
+        ↓
+Context Vector
+```
+
+Final Attention Formula:
+
+```text
+Attention(Q,K,V)
+=
+softmax(QKᵀ / √dk)V
+```
+
+---
+
+# Why Self-Attention?
+
+Because:
+
+```text
+Q, K, V
+```
+
+all come from:
+
+```text
+The same sequence.
+```
+
+Example:
+
+```text
+[I] [love] [AI]
+```
+
+Every token attends to every other token.
+
+---
+
+# 5. Multi-Head Attention
+
+Instead of one attention mechanism:
+
+```text
+Head 1
+```
+
+we use many.
+
+Example:
+
+```text
+Head 1
+Head 2
+Head 3
+Head 4
+Head 5
+Head 6
+Head 7
+Head 8
+```
+
+---
+
+## Why?
+
+Different heads learn different relationships.
+
+Example:
+
+```text
+Head 1 → Grammar
+
+Head 2 → Subject-Verb
+
+Head 3 → Long-distance Dependencies
+
+Head 4 → Entity Relationships
+```
+
+---
+
+## Flow
+
+```text
+Input
+  ↓
+
+Head1 Attention
+Head2 Attention
+Head3 Attention
+Head4 Attention
+
+  ↓
+Concatenate
+
+  ↓
+Linear Layer
+```
+
+---
+
+# 6. Residual Connections
+
+After attention:
+
+```text
+Output
+=
+Input
++
+Attention Output
+```
+
+Visualization:
+
+```text
+Input
+  │
+  ├───────────┐
+  │           │
+Attention     │
+  │           │
+  └── Add ◄───┘
+```
+
+---
+
+## Why?
+
+Helps:
+
+```text
+✓ Stable gradients
+
+✓ Easier optimization
+
+✓ Deep networks train better
+```
+
+---
+
+# 7. Layer Normalization
+
+Applied after residual connections.
+
+Example:
+
+```text
+[2,4,6]
+```
+
+Mean:
+
+```text
+4
+```
+
+Normalized:
+
+```text
+[-1.22,0,1.22]
+```
+
+---
+
+## Why?
+
+Provides:
+
+```text
+Stable activations
+
+Stable gradients
+
+Faster convergence
+```
+
+Transformers use:
+
+```text
+LayerNorm
+```
+
+not BatchNorm.
+
+---
+
+# 8. Feed Forward Network (FFN)
+
+A small MLP applied independently to every token.
+
+Example:
+
+```text
+Input Size = 768
+
+768
+ ↓
+3072
+ ↓
+768
+```
+
+---
+
+## Formula
+
+```text
+FFN(x)
+
+=
+Linear
+↓
+Activation
+↓
+Linear
+```
+
+Common activations:
+
+```text
+ReLU
+
+GELU
+
+SiLU
+```
+
+---
+
+## Purpose
+
+Attention mixes token information.
+
+FFN performs:
+
+```text
+Feature extraction
+
+Non-linear transformations
+
+Representation learning
+```
+
+---
+
+# 9. Encoder Block
+
+One encoder layer:
+
+```text
+Input
+  ↓
+Multi-Head Self Attention
+  ↓
+Add + LayerNorm
+  ↓
+Feed Forward Network
+  ↓
+Add + LayerNorm
+  ↓
+Output
+```
+
+---
+
+# 10. Encoder Stack
+
+Many encoder layers are stacked.
+
+Example:
+
+```text
+Encoder Layer 1
+Encoder Layer 2
+Encoder Layer 3
+...
+Encoder Layer N
+```
+
+Original Transformer:
+
+```text
+N = 6
+```
+
+Modern models:
+
+```text
+12
+24
+48
+96+
+```
+
+---
+
+# 11. Masked Self-Attention
+
+Used in GPT.
+
+Suppose:
+
+```text
+I love _____
+```
+
+When predicting the next token, the model must not see future tokens.
+
+Mask:
+
+```text
+✓ I
+✓ love
+✗ future words
+```
+
+Attention Matrix:
+
+```text
+1 0 0
+1 1 0
+1 1 1
+```
+
+Upper triangle is blocked.
+
+---
+
+# Why?
+
+Without masking:
+
+```text
+The model could cheat by looking ahead.
+```
+
+---
+
+# 12. Cross-Attention
+
+Used in Encoder-Decoder models.
+
+Example:
+
+```text
+English:
+"I love AI"
+
+French:
+"J'aime l'IA"
+```
+
+---
+
+Encoder processes:
+
+```text
+"I love AI"
+```
+
+Decoder generates:
+
+```text
+"J'aime"
+```
+
+Cross-Attention:
+
+```text
+Q ← Decoder
+
+K ← Encoder
+
+V ← Encoder
+```
+
+---
+
+## Intuition
+
+Decoder asks:
+
+```text
+Which encoder words should I focus on?
+```
+
+---
+
+# 13. Linear Layer
+
+After the final Transformer block:
+
+```text
+Hidden State
+```
+
+Shape:
+
+```text
+(batch_size, sequence_length, d_model)
+```
+
+Example:
+
+```text
+(1,1,4096)
+```
+
+Project to vocabulary size:
+
+```text
+4096
+ ↓
+50000
+```
+
+Result:
+
+```text
+Logits
+```
+
+One score per vocabulary word.
+
+---
+
+# 14. Softmax
+
+Convert logits into probabilities.
+
+Example:
+
+```text
+cat  → 10
+dog  → 4
+bird → 1
+```
+
+After Softmax:
+
+```text
+cat  → 0.997
+dog  → 0.002
+bird → 0.001
+```
+
+---
+
+# 15. Output Token
+
+Choose the next token.
+
+Example:
+
+```text
+cat → highest probability
+```
+
+Output:
+
+```text
+cat
+```
+
+The generated token is fed back into the model.
+
+```text
+Previous Tokens
+       +
+Generated Token
+       ↓
+Next Prediction
+```
+
+---
+
+# Complete Encoder Block
+
+```text
+Input
+  ↓
+Multi-Head Self Attention
+  ↓
+Residual Connection
+  ↓
+LayerNorm
+  ↓
+Feed Forward Network
+  ↓
+Residual Connection
+  ↓
+LayerNorm
+  ↓
+Output
+```
+
+---
+
+# Complete Decoder Block
+
+```text
+Input
+  ↓
+Masked Self Attention
+  ↓
+Add + LayerNorm
+  ↓
+Cross Attention
+  ↓
+Add + LayerNorm
+  ↓
+Feed Forward Network
+  ↓
+Add + LayerNorm
+  ↓
+Output
+```
+
+---
+
+# GPT Architecture
+
+GPT removes the encoder completely.
+
+Architecture:
+
+```text
+Token Embedding
+      ↓
+Positional Encoding
+      ↓
+Masked Multi-Head Self Attention
+      ↓
+Add + LayerNorm
+      ↓
+Feed Forward Network
+      ↓
+Add + LayerNorm
+
+(repeated N times)
+
+      ↓
+Linear Layer
+      ↓
+Softmax
+      ↓
+Next Token
+```
+
+---
+
+# Interview Summary
+
+| Component | Purpose |
+|------------|----------|
+| Token Embedding | Convert tokens into vectors |
+| Positional Encoding | Add sequence order |
+| Query (Q) | What am I looking for? |
+| Key (K) | What information do I contain? |
+| Value (V) | Actual information passed forward |
+| Self-Attention | Tokens attend to each other |
+| Multi-Head Attention | Learn multiple relationships |
+| Residual Connection | Easier optimization |
+| LayerNorm | Stable training |
+| Feed Forward Network | Non-linear feature learning |
+| Masked Attention | Prevent future leakage |
+| Cross-Attention | Decoder attends to encoder |
+| Linear Layer | Convert hidden states to vocabulary scores |
+| Softmax | Convert scores to probabilities |
+| Output Token | Predicted next token |
+
+
+
+# What Do Encoder and Decoder Actually Do?
+
+Many people memorize:
+
+```text
+Encoder → Understands Input
+
+Decoder → Generates Output
+```
+
+but that doesn't explain *why* we need them.
+
+Let's understand with an example.
+
+---
+
+# Translation Example
+
+Suppose we want to translate:
+
+```text
+English:
+"I love AI"
+```
+
+into French:
+
+```text
+"J'aime l'IA"
+```
+
+---
+
+# Encoder's Job
+
+The encoder reads the entire input sentence and creates a rich representation of its meaning.
+
+Input:
+
+```text
+[I] [love] [AI]
+```
+
+After several encoder layers:
+
+```text
+[I]    → h1
+[love] → h2
+[AI]   → h3
+```
+
+where:
+
+```text
+h1, h2, h3
+```
+
+are contextual embeddings.
+
+---
+
+## What Is a Contextual Embedding?
+
+Before attention:
+
+```text
+AI
+```
+
+only means:
+
+```text
+AI
+```
+
+After encoder attention:
+
+```text
+AI
+```
+
+knows:
+
+```text
+Who loves AI?
+What words are around it?
+What is the sentence about?
+```
+
+---
+
+Example:
+
+```text
+"The bank is near the river"
+```
+
+Encoder learns:
+
+```text
+bank = river bank
+```
+
+not
+
+```text
+bank = financial institution
+```
+
+because surrounding words provide context.
+
+---
+
+# Encoder Analogy
+
+Imagine reading a book.
+
+Before answering questions you first read the entire paragraph and understand it.
+
+That's exactly what the encoder does.
+
+```text
+Input Sentence
+      ↓
+Read Everything
+      ↓
+Build Understanding
+      ↓
+Store Meaning
+```
+
+---
+
+# Encoder Output
+
+Suppose:
+
+```text
+"I love AI"
+```
+
+becomes:
+
+```text
+h1 = meaning of "I"
+
+h2 = meaning of "love"
+
+h3 = meaning of "AI"
+```
+
+but each vector now contains context from the whole sentence.
+
+---
+
+Visualization:
+
+```text
+Input
+
+[I] [love] [AI]
+
+        ↓
+
+Encoder
+
+[h1] [h2] [h3]
+```
+
+These vectors are passed to the decoder.
+
+---
+
+# Decoder's Job
+
+The decoder generates the output sequence one token at a time.
+
+For translation:
+
+```text
+French Output
+
+[J']
+```
+
+then
+
+```text
+[J'aime]
+```
+
+then
+
+```text
+[J'aime l']
+```
+
+then
+
+```text
+[J'aime l'IA]
+```
+
+---
+
+# Why Not Generate Everything At Once?
+
+Language generation is autoregressive.
+
+The next word depends on previous words.
+
+Example:
+
+```text
+The cat sat on the _____
+```
+
+Possible next words:
+
+```text
+mat
+chair
+sofa
+table
+```
+
+Need previous context to choose.
+
+---
+
+# Decoder Workflow
+
+Suppose decoder has generated:
+
+```text
+J'aime
+```
+
+Now it wants next word.
+
+It performs:
+
+```text
+1. Look at previous French words
+2. Look at encoder output
+3. Predict next word
+```
+
+---
+
+# Self-Attention Inside Decoder
+
+Current output:
+
+```text
+[J']
+[J'aime]
+```
+
+The decoder attends to previously generated words.
+
+```text
+J'aime
+   ↑
+   │
+   └── attends to J'
+```
+
+This helps maintain grammar and coherence.
+
+---
+
+# Cross-Attention Inside Decoder
+
+Decoder also looks at encoder outputs.
+
+```text
+Encoder Output
+
+[I]
+[love]
+[AI]
+
+      ↑
+      │
+Decoder attends here
+```
+
+---
+
+Suppose decoder is generating:
+
+```text
+IA
+```
+
+Cross-attention helps it focus on:
+
+```text
+AI
+```
+
+from the English sentence.
+
+---
+
+# Encoder vs Decoder
+
+## Encoder
+
+Input:
+
+```text
+"I love AI"
+```
+
+Output:
+
+```text
+Meaning Representation
+```
+
+Job:
+
+```text
+Understand
+Analyze
+Extract Context
+```
+
+---
+
+## Decoder
+
+Input:
+
+```text
+Encoder Output
++
+Previously Generated Tokens
+```
+
+Output:
+
+```text
+Next Token
+```
+
+Job:
+
+```text
+Generate
+Predict
+Compose Output
+```
+
+---
+
+# Real-Life Analogy
+
+Imagine a translator.
+
+---
+
+## Encoder Stage
+
+Translator reads:
+
+```text
+"I love AI"
+```
+
+and thinks:
+
+```text
+Okay,
+
+Subject = I
+
+Action = love
+
+Object = AI
+```
+
+The translator now understands the sentence.
+
+---
+
+## Decoder Stage
+
+Translator starts speaking French:
+
+```text
+J'
+```
+
+then
+
+```text
+J'aime
+```
+
+then
+
+```text
+J'aime l'IA
+```
+
+The understanding came from the encoder.
+
+The generation came from the decoder.
+
+---
+
+# Why Do We Need Both?
+
+If we only had a decoder:
+
+```text
+Input Sentence
+      ↓
+Generate Output
+```
+
+the model must:
+
+```text
+Understand Input
+AND
+Generate Output
+```
+
+at the same time.
+
+Much harder.
+
+---
+
+Encoder-Decoder separates responsibilities:
+
+```text
+Encoder
+    ↓
+Understand
+
+Decoder
+    ↓
+Generate
+```
+
+---
+
+# Example: Summarization
+
+Input:
+
+```text
+The movie was released in 2025 and became a global success...
+```
+
+Encoder:
+
+```text
+Reads whole article
+Builds representation
+```
+
+Decoder:
+
+```text
+Generates summary
+
+"The movie was a global success."
+```
+
+---
+
+# Example: Question Answering
+
+Input:
+
+```text
+Context:
+Paris is the capital of France.
+
+Question:
+What is the capital of France?
+```
+
+Encoder:
+
+```text
+Understands context and question.
+```
+
+Decoder:
+
+```text
+Generates:
+
+"Paris"
+```
+
+---
+
+# Why GPT Has No Encoder
+
+GPT only generates text.
+
+Task:
+
+```text
+Next Token Prediction
+```
+
+Example:
+
+```text
+The sky is _____
+```
+
+GPT simply predicts:
+
+```text
+blue
+```
+
+Therefore GPT uses:
+
+```text
+Decoder Only
+```
+
+Architecture:
+
+```text
+Masked Self-Attention
++
+Feed Forward
+```
+
+repeated many times.
+
+---
+
+# Why BERT Has No Decoder
+
+BERT is designed for understanding.
+
+Tasks:
+
+```text
+Classification
+
+Sentiment Analysis
+
+NER
+
+Embeddings
+```
+
+It doesn't generate text.
+
+Therefore BERT uses:
+
+```text
+Encoder Only
+```
+
+---
+
+# Model Comparison
+
+| Model | Encoder | Decoder |
+|---------|----------|----------|
+| BERT | ✓ | ✗ |
+| RoBERTa | ✓ | ✗ |
+| T5 | ✓ | ✓ |
+| Original Transformer | ✓ | ✓ |
+| GPT | ✗ | ✓ |
+| Llama | ✗ | ✓ |
+| Mistral | ✗ | ✓ |
+
+---
+
+# Memory Trick
+
+```text
+Encoder
+========
+
+Read Book
+Understand Book
+
+        ↓
+
+Create Notes
+
+
+Decoder
+========
+
+Read Notes
+
+Write Answer
+```
+
+---
+
+# Ultimate Interview Answer
+
+**The encoder reads the entire input sequence and converts it into contextual representations that capture its meaning. The decoder uses those representations, along with previously generated tokens, to generate the output sequence one token at a time.**
