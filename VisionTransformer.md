@@ -76,7 +76,13 @@ Image → Patches → Embeddings → Transformer → Classification
 
 * Image size: 224 × 224
 * Patch size: 16 × 16
-* Embedding dimension: 768
+* Embedding dimension: 768 [
+ 0.12,
+ -0.45,
+ 1.23,
+ ...
+ 768 values total
+]
 * Transformer blocks: 12
 * Attention heads: 12
 * Head dimension: 64 (since 768 / 12 = 64)
