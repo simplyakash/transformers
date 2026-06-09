@@ -3826,3 +3826,757 @@ Write Answer
 # Ultimate Interview Answer
 
 **The encoder reads the entire input sequence and converts it into contextual representations that capture its meaning. The decoder uses those representations, along with previously generated tokens, to generate the output sequence one token at a time.**
+
+
+# Sliding Window Context
+
+Sliding Window Context is a technique used in some LLMs to handle very long sequences without making attention computation grow quadratically.
+
+---
+
+# Problem with Normal Attention
+
+Suppose:
+
+Context Length = 100,000 tokens
+
+Each token attends to every other token.
+
+Attention Matrix:
+
+```text
+100,000 × 100,000
+```
+
+Complexity:
+
+O(n²)
+
+This becomes extremely expensive in terms of:
+
+- Compute
+- Memory
+- Latency
+
+---
+
+# Sliding Window Idea
+
+Instead of attending to all tokens, each token attends only to nearby tokens.
+
+Example:
+
+```text
+Window Size = 4
+```
+
+Sequence:
+
+```text
+A B C D E F G H I J
+```
+
+Token E attends only to:
+
+```text
+C D E F G
+```
+
+and ignores:
+
+```text
+A B H I J
+```
+
+---
+
+# Visualization
+
+## Full Attention
+
+```text
+A → A B C D E F G H I J
+B → A B C D E F G H I J
+C → A B C D E F G H I J
+D → A B C D E F G H I J
+...
+```
+
+Every token sees every token.
+
+---
+
+## Sliding Window Attention
+
+```text
+A → A B C
+B → A B C D
+C → A B C D E
+D → B C D E F
+E → C D E F G
+F → D E F G H
+...
+```
+
+Each token only sees a local neighborhood.
+
+---
+
+# Example
+
+Window Size = 3
+
+For Token at Position 10:
+
+```text
+Positions:
+
+7  8  9  10  11  12  13
+```
+
+Only these tokens are visible.
+
+Tokens farther away are ignored.
+
+---
+
+# Attention Matrix
+
+## Full Attention
+
+```text
+■■■■■■■■■■
+■■■■■■■■■■
+■■■■■■■■■■
+■■■■■■■■■■
+■■■■■■■■■■
+```
+
+Every token attends to every token.
+
+---
+
+## Sliding Window Attention
+
+```text
+■■■□□□□□□□
+■■■■□□□□□□
+■■■■■□□□□□
+□■■■■■□□□□
+□□■■■■■□□□
+□□□■■■■■□□
+□□□□■■■■■□
+```
+
+Only a band around the diagonal is computed.
+
+---
+
+# Complexity
+
+## Full Attention
+
+O(n²)
+
+Example:
+
+```text
+100,000 × 100,000
+```
+
+= 10 billion attention scores
+
+---
+
+## Sliding Window Attention
+
+O(n × w)
+
+where:
+
+```text
+n = context length
+w = window size
+```
+
+Example:
+
+```text
+n = 100,000
+w = 512
+```
+
+Computation:
+
+```text
+100,000 × 512
+```
+
+Much smaller than:
+
+```text
+100,000 × 100,000
+```
+
+---
+
+# Why Does It Work?
+
+In language modeling, nearby tokens are usually the most important.
+
+Example:
+
+```text
+The cat sat on the ______
+```
+
+To predict the next word:
+
+```text
+mat
+```
+
+The model mostly needs nearby words.
+
+It usually does not need tokens from thousands of positions earlier.
+
+---
+
+# Limitation
+
+Suppose:
+
+```text
+Page 1:
+John is a doctor.
+
+...
+
+Page 100:
+What is John's profession?
+```
+
+The information:
+
+```text
+John is a doctor
+```
+
+may be outside the attention window.
+
+A pure sliding window model may fail to access it.
+
+---
+
+# How Modern Models Solve This
+
+Many models combine:
+
+## 1. Sliding Window Attention
+
+```text
+Local information
+```
+
+---
+
+## 2. Global Attention
+
+Certain tokens can attend everywhere.
+
+```text
+CLS
+Special Tokens
+Summary Tokens
+```
+
+---
+
+## 3. Memory Mechanisms
+
+Store important information from earlier context.
+
+```text
+Past Chunks
+Retrieved Knowledge
+Memory Tokens
+```
+
+---
+
+# Example Models
+
+- Mistral 7B
+- Mixtral
+- Longformer
+- Transformer-XL (related memory concept)
+
+---
+
+# Mistral's Sliding Window Attention
+
+Mistral introduced:
+
+```text
+Sliding Window Attention (SWA)
+```
+
+Each token attends only to a fixed-size local window.
+
+Benefits:
+
+- Lower memory usage
+- Faster inference
+- Longer effective contexts
+
+---
+
+# Full Attention vs Sliding Window
+
+| Feature | Full Attention | Sliding Window |
+|----------|----------|----------|
+| Attention Scope | Entire Context | Local Window |
+| Complexity | O(n²) | O(n × w) |
+| Memory Usage | High | Low |
+| Long Context Efficiency | Poor | Good |
+| Access to Distant Tokens | Yes | Limited |
+
+---
+
+# Interview Answer
+
+Q: What is Sliding Window Context?
+
+A:
+
+Sliding Window Context is an attention mechanism where each token attends only to a fixed-size neighborhood of nearby tokens rather than the entire sequence. This reduces attention complexity from O(n²) to O(n × w), where w is the window size. It significantly improves memory and compute efficiency for long-context models, though it may lose access to very distant information unless combined with global attention or memory mechanisms.
+
+
+
+# 🧠 Transformer Complexity
+
+Let:
+
+```text
+n = Context Length (Number of Tokens)
+
+d = Embedding Dimension
+```
+
+Example:
+
+```text
+GPT:
+n = 4096
+d = 12288
+
+ViT:
+n = 197
+d = 768
+```
+
+---
+
+# 📦 Input Shape
+
+Input to Transformer:
+
+```text
+X : (n × d)
+```
+
+Example:
+
+```text
+4096 × 12288
+```
+
+---
+
+# 1️⃣ Q, K, V Projection Complexity
+
+Transformer computes:
+
+Q = XWq
+
+K = XWk
+
+V = XWv
+
+Shapes:
+
+```text
+X   : (n × d)
+
+Wq  : (d × d)
+
+Q   : (n × d)
+```
+
+Matrix multiplication cost:
+
+```text
+(n × d) × (d × d)
+
+= O(nd²)
+```
+
+Similarly:
+
+```text
+K = O(nd²)
+
+V = O(nd²)
+```
+
+Total:
+
+```text
+O(3nd²)
+
+≈ O(nd²)
+```
+
+---
+
+# 2️⃣ Attention Score Computation
+
+Self-attention computes:
+
+```
+            T
+Attention = QK
+```
+
+Shapes:
+
+```text
+Q  : (n × d)
+
+Kᵀ : (d × n)
+```
+
+Result:
+
+```text
+(n × n)
+```
+
+Cost:
+
+```text
+(n × d) × (d × n)
+
+= O(n²d)
+```
+
+This is the expensive step.
+
+---
+
+# 3️⃣ Softmax
+
+Attention Matrix:
+
+```text
+(n × n)
+```
+
+Apply Softmax:
+
+```text
+O(n²)
+```
+
+Usually negligible compared to:
+
+```text
+O(n²d)
+```
+
+---
+
+# 4️⃣ Multiply By V
+
+Attention Output:
+
+```text
+Attention × V
+```
+
+Shapes:
+
+```text
+(n × n)
+
+×
+
+(n × d)
+```
+
+Cost:
+
+```text
+O(n²d)
+```
+
+---
+
+# 🔍 Total Self-Attention Complexity
+
+Adding everything:
+
+```text
+Q,K,V Projections   = O(nd²)
+
+QKᵀ                = O(n²d)
+
+Attention × V      = O(n²d)
+```
+
+Total:
+
+```text
+O(nd² + n²d)
+```
+
+---
+
+# 🎯 Most Common Interview Answer
+
+Self-Attention Complexity:
+
+```text
+O(n²d)
+```
+
+because for long sequences:
+
+```text
+n >> d
+```
+
+and:
+
+```text
+n²d dominates
+```
+
+---
+
+# 📈 Why Long Context Is Expensive
+
+Suppose:
+
+```text
+n = 4096
+```
+
+Attention Matrix:
+
+```text
+4096 × 4096
+```
+
+Elements:
+
+```text
+16,777,216
+```
+
+---
+
+Suppose:
+
+```text
+n = 32000
+```
+
+Attention Matrix:
+
+```text
+32000 × 32000
+```
+
+Elements:
+
+```text
+1,024,000,000
+```
+
+Over 1 billion attention scores.
+
+This is why long-context LLMs are expensive.
+
+---
+
+# 💾 Memory Complexity
+
+Need to store:
+
+```text
+Attention Matrix
+
+(n × n)
+```
+
+Memory:
+
+```text
+O(n²)
+```
+
+This is often the real bottleneck.
+
+---
+
+# 5️⃣ Feed Forward Network (FFN)
+
+Each Transformer block also contains:
+
+```text
+Linear
+  ↓
+GELU
+  ↓
+Linear
+```
+
+Typical dimensions:
+
+```text
+d
+↓
+4d
+↓
+d
+```
+
+Complexity:
+
+```text
+O(nd²)
+```
+
+---
+
+# 📦 Complete Transformer Block
+
+```text
+Input
+  ↓
+Multi-Head Attention
+  ↓
+Add & Norm
+  ↓
+Feed Forward Network
+  ↓
+Add & Norm
+```
+
+Complexity:
+
+```text
+Attention : O(nd² + n²d)
+
+FFN       : O(nd²)
+```
+
+Total:
+
+```text
+O(2nd² + n²d)
+
+≈ O(nd² + n²d)
+```
+
+---
+
+# 🚀 Sliding Window Attention
+
+Instead of attending to all tokens:
+
+```text
+n × n
+```
+
+each token attends to only:
+
+```text
+w tokens
+```
+
+Attention Matrix:
+
+```text
+n × w
+```
+
+Complexity:
+
+```text
+O(nwd)
+```
+
+instead of:
+
+```text
+O(n²d)
+```
+
+Memory:
+
+```text
+O(nw)
+```
+
+instead of:
+
+```text
+O(n²)
+```
+
+---
+
+# 📊 Complexity Summary
+
+| Component | Time Complexity |
+|------------|------------|
+| Q/K/V Projection | O(nd²) |
+| Attention Scores (QKᵀ) | O(n²d) |
+| Attention × V | O(n²d) |
+| FFN | O(nd²) |
+| Full Transformer Block | O(nd² + n²d) |
+| Memory | O(n²) |
+| Sliding Window Attention | O(nwd) |
+
+---
+
+# 🎤 Interview One-Liner
+
+A Transformer block has time complexity:
+
+```text
+O(nd² + n²d)
+```
+
+where:
+
+```text
+n = context length
+d = embedding dimension
+```
+
+The quadratic term:
+
+```text
+O(n²d)
+```
+
+comes from self-attention and becomes the dominant cost for long-context models, while memory complexity is:
+
+```text
+O(n²)
+```
+
+due to the attention matrix.
