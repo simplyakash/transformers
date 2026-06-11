@@ -4580,3 +4580,314 @@ O(n²)
 ```
 
 due to the attention matrix.
+
+
+# Label Smoothing
+
+Label Smoothing is a regularization technique used in classification tasks to prevent the model from becoming **overconfident**.
+
+---
+
+# Problem Without Label Smoothing
+
+Suppose we have a 4-class classification problem:
+
+Classes:
+
+```text
+[Cat, Dog, Horse, Bird]
+```
+
+Ground Truth = Dog
+
+Using One-Hot Encoding:
+
+```text
+[0, 1, 0, 0]
+```
+
+This means:
+
+```text
+Dog   = 100% correct
+Others = 0% correct
+```
+
+The model tries to predict:
+
+```text
+[0.0001, 0.9997, 0.0001, 0.0001]
+```
+
+which makes it extremely confident.
+
+---
+
+# Why Is This Bad?
+
+Overconfident models:
+
+❌ Overfit training data
+
+❌ Generalize poorly
+
+❌ Are poorly calibrated
+
+❌ Become sensitive to label noise
+
+---
+
+# Label Smoothing Idea
+
+Instead of assigning:
+
+```text
+[0, 1, 0, 0]
+```
+
+we assign:
+
+```text
+[0.033, 0.9, 0.033, 0.033]
+```
+
+Now the model learns:
+
+```text
+Dog is very likely,
+but other classes are not impossible.
+```
+
+---
+
+# Formula
+
+Let:
+
+```text
+K = Number of classes
+ε = Smoothing factor
+```
+
+Correct class probability:
+
+```text
+1 − ε
+```
+
+Incorrect class probability:
+
+```text
+ε / (K − 1)
+```
+
+---
+
+# Example
+
+Suppose:
+
+```text
+K = 4
+ε = 0.1
+```
+
+Correct class:
+
+```text
+1 − 0.1 = 0.9
+```
+
+Incorrect classes:
+
+```text
+0.1 / (4 − 1)
+= 0.1 / 3
+= 0.033
+```
+
+Original label:
+
+```text
+[0, 1, 0, 0]
+```
+
+Smoothed label:
+
+```text
+[0.033, 0.9, 0.033, 0.033]
+```
+
+---
+
+# Visual Example
+
+Without Label Smoothing:
+
+```text
+Cat    0
+Dog    1
+Horse  0
+Bird   0
+```
+
+With Label Smoothing:
+
+```text
+Cat    0.033
+Dog    0.900
+Horse  0.033
+Bird   0.033
+```
+
+---
+
+# Cross Entropy Loss
+
+Cross Entropy:
+
+L = − Σ yi log(pi)
+
+Where:
+
+```text
+yi = Ground Truth Probability
+pi = Predicted Probability
+```
+
+Without smoothing:
+
+```text
+Target = [0,1,0,0]
+```
+
+Only the correct class contributes.
+
+With smoothing:
+
+```text
+Target = [0.033,0.9,0.033,0.033]
+```
+
+All classes contribute slightly.
+
+This discourages extreme confidence.
+
+---
+
+# Example
+
+Prediction:
+
+```text
+[0.01, 0.97, 0.01, 0.01]
+```
+
+Without smoothing:
+
+```text
+Loss = −log(0.97)
+```
+
+With smoothing:
+
+```text
+Loss =
+−0.9×log(0.97)
+−0.033×log(0.01)
+−0.033×log(0.01)
+−0.033×log(0.01)
+```
+
+Now the model is penalized for assigning near-zero probability to all other classes.
+
+---
+
+# Intuition
+
+Without Label Smoothing:
+
+```text
+Correct Class     → 1
+Other Classes     → 0
+```
+
+The model learns:
+
+```text
+P(correct) → 1
+P(others) → 0
+```
+
+With Label Smoothing:
+
+```text
+Correct Class     → High
+Other Classes     → Small Non-Zero Values
+```
+
+The model learns:
+
+```text
+P(correct) → High
+P(others) → Small but non-zero
+```
+
+---
+
+# Benefits
+
+✅ Reduces overfitting
+
+✅ Improves generalization
+
+✅ Better probability calibration
+
+✅ More robust to noisy labels
+
+✅ Improves Transformer performance
+
+✅ Reduces overconfidence
+
+---
+
+# Label Smoothing in Transformers
+
+The paper:
+
+**Attention Is All You Need**
+
+used:
+
+```text
+ε = 0.1
+```
+
+for machine translation.
+
+This improved:
+
+- BLEU Score
+- Generalization
+- Training Stability
+
+---
+
+# PyTorch Example
+
+```python
+import torch
+import torch.nn as nn
+
+criterion = nn.CrossEntropyLoss(
+    label_smoothing=0.1
+)
+
+loss = criterion(outputs, targets)
+```
+
+---
+
+# Interview Answer
+
+Label Smoothing is a regularization technique in which the one-hot target labels are softened by distributing a small probability mass to incorrect classes. Instead of forcing the model to predict 100% confidence for the correct class, it learns a smoother target distribution. This reduces overconfidence, improves calibration, enhances generalization, and makes the model more robust to noisy labels.
