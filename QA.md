@@ -4891,3 +4891,555 @@ loss = criterion(outputs, targets)
 # Interview Answer
 
 Label Smoothing is a regularization technique in which the one-hot target labels are softened by distributing a small probability mass to incorrect classes. Instead of forcing the model to predict 100% confidence for the correct class, it learns a smoother target distribution. This reduces overconfidence, improves calibration, enhances generalization, and makes the model more robust to noisy labels.
+
+
+# 🧠 The Purpose of Q, K, and V (Query, Key, Value)
+
+In modern AI—specifically **Transformers** (GPT, BERT, Llama, ViT, etc.)—**Q, K, and V** stand for:
+
+```text
+Q = Query
+
+K = Key
+
+V = Value
+```
+
+They are the core components of the **Self-Attention Mechanism**.
+
+Their purpose is to allow the model to understand **context** by deciding:
+
+```text
+How much attention should one token pay
+to every other token?
+```
+
+---
+
+# 💡 Search Engine Analogy
+
+The easiest way to understand Q, K, and V is through a search engine.
+
+Imagine searching YouTube:
+
+```text
+Query (Q)
+    ↓
+"Videos about baking bread"
+
+Key (K)
+    ↓
+Titles and tags of all videos
+
+Value (V)
+    ↓
+Actual video content
+```
+
+Example:
+
+```text
+Query:
+"How to bake bread"
+
+Keys:
+"How to bake sourdough"
+"Cat videos"
+"Learn Python"
+
+Values:
+Actual content of those videos
+```
+
+The search engine:
+
+```text
+1. Compares Query with Keys
+2. Finds best matches
+3. Returns corresponding Values
+```
+
+This is exactly how attention works.
+
+---
+
+# 🔍 Q, K, and V Inside a Transformer
+
+Consider the sentence:
+
+```text
+"The bank of the river"
+```
+
+When the model processes:
+
+```text
+bank
+```
+
+it must determine whether:
+
+```text
+bank = financial institution
+
+or
+
+bank = river edge
+```
+
+To do this, it uses Q, K, and V.
+
+---
+
+# ❓ Query (Q)
+
+Purpose:
+
+```text
+Represents what the current token
+is looking for.
+```
+
+For:
+
+```text
+bank
+```
+
+the Query asks:
+
+```text
+"I have multiple meanings.
+
+Can anyone provide context
+to help me?"
+```
+
+---
+
+# 🏷️ Key (K)
+
+Purpose:
+
+```text
+Represents what information
+each token can offer.
+```
+
+For:
+
+```text
+river
+```
+
+the Key says:
+
+```text
+I am related to:
+
+water
+nature
+geography
+```
+
+Think of Keys as labels or metadata.
+
+---
+
+# 📦 Value (V)
+
+Purpose:
+
+```text
+Contains the actual information
+that will be transferred.
+```
+
+For:
+
+```text
+river
+```
+
+the Value contains:
+
+```text
+Semantic meaning
+
+Water
+Nature
+Geography
+Flow
+```
+
+If attention decides:
+
+```text
+river is important
+```
+
+then its Value gets passed to:
+
+```text
+bank
+```
+
+helping resolve the ambiguity.
+
+---
+
+# 🎯 Key Intuition
+
+```text
+Q = What am I looking for?
+
+K = What information do I contain?
+
+V = What information can I provide?
+```
+
+Or:
+
+```text
+Q = Search Query
+
+K = Search Index
+
+V = Actual Content
+```
+
+---
+
+# 🔄 How They Work Together
+
+Attention is computed as:
+
+\[
+Attention(Q,K,V)
+=
+Softmax\left(
+\frac{QK^T}{\sqrt{d_k}}
+\right)V
+\]
+
+---
+
+# Step 1: Match Query Against Keys
+
+```text
+bank (Q)
+      │
+      ▼
+
+Compare with:
+
+river (K)
+
+the (K)
+
+of (K)
+```
+
+Using dot products:
+
+```text
+Q × K
+```
+
+Suppose scores are:
+
+```text
+river : 9.5
+
+the   : 0.2
+
+of    : 0.3
+```
+
+---
+
+# Step 2: Softmax
+
+Convert scores into probabilities.
+
+```text
+river : 95%
+
+the   : 3%
+
+of    : 2%
+```
+
+These are called:
+
+```text
+Attention Weights
+```
+
+---
+
+# Step 3: Retrieve Values
+
+Now use the weights to combine Values.
+
+```text
+Output
+
+=
+
+0.95 × V(river)
+
++
+
+0.03 × V(the)
+
++
+
+0.02 × V(of)
+```
+
+Since:
+
+```text
+river
+```
+
+gets most of the attention,
+
+its meaning dominates.
+
+---
+
+# Visual Pipeline
+
+```text
+            Query (bank)
+                  │
+                  ▼
+
+        Compare Against Keys
+
+      ┌─────────┬─────────┬─────────┐
+      │  river  │   the   │   of    │
+      └─────────┴─────────┴─────────┘
+
+                  │
+                  ▼
+
+         Similarity Scores
+
+      river → 95%
+      the   → 3%
+      of    → 2%
+
+                  │
+                  ▼
+
+      Weighted Sum of Values
+
+      0.95 × V(river)
+
+    + 0.03 × V(the)
+
+    + 0.02 × V(of)
+
+                  │
+                  ▼
+
+       Updated Meaning of "bank"
+```
+
+---
+
+# Why Do We Need V?
+
+Many people understand Q and K but wonder:
+
+```text
+Why not stop after Q × K?
+```
+
+Because:
+
+```text
+Q and K only determine
+
+WHERE to look
+```
+
+They do NOT contain the information to transfer.
+
+The actual information lives inside:
+
+```text
+Value (V)
+```
+
+---
+
+# Database Analogy
+
+Think of a database:
+
+```text
+Query
+   ↓
+Search Keys
+   ↓
+Find Matching Rows
+   ↓
+Return Values
+```
+
+Similarly:
+
+```text
+Query
+   ↓
+Compare With Keys
+   ↓
+Compute Attention
+   ↓
+Retrieve Values
+```
+
+---
+
+# Matrix Shapes
+
+Suppose:
+
+```text
+n = number of tokens
+
+d = embedding dimension
+```
+
+Then:
+
+```text
+Q : (n × d)
+
+K : (n × d)
+
+V : (n × d)
+```
+
+Attention Scores:
+
+```text
+QKᵀ
+
+(n × d)
+
+×
+
+(d × n)
+
+=
+
+(n × n)
+```
+
+This tells us:
+
+```text
+Which token attends to which token
+```
+
+---
+
+# Final Attention Output
+
+```text
+Attention Matrix
+
+(n × n)
+
+×
+
+Value Matrix
+
+(n × d)
+
+=
+
+(n × d)
+```
+
+Each token becomes:
+
+```text
+A weighted combination
+of other tokens' Value vectors.
+```
+
+---
+
+# Example
+
+Sentence:
+
+```text
+"The animal didn't cross the street because it was tired."
+```
+
+When processing:
+
+```text
+it
+```
+
+attention may focus on:
+
+```text
+animal
+```
+
+The Value vector of:
+
+```text
+animal
+```
+
+contains semantic information about:
+
+```text
+living thing
+subject
+entity
+```
+
+This information is transferred to:
+
+```text
+it
+```
+
+allowing the model to understand:
+
+```text
+it = animal
+```
+
+---
+
+# 📊 Summary Table
+
+| Component | What It Represents | Analogy | Core Question |
+|------------|------------|------------|------------|
+| **Query (Q)** | Current token looking for information | Search text | "What am I looking for?" |
+| **Key (K)** | Information index/metadata | Video title/tags | "What kind of information do I contain?" |
+| **Value (V)** | Actual content/meaning | Actual video | "What information do I provide?" |
+
+---
+
+# 🎤 Interview Answer
+
+Q, K, and V are learned projections of token embeddings used in self-attention. The Query (Q) represents what a token is looking for, the Key (K) represents what information each token can offer, and the Value (V) contains the actual information to be transferred. Attention scores are computed by comparing Queries with Keys, and these scores are used to create a weighted sum of the Value vectors. In short:
+
+```text
+Q and K decide WHERE to attend.
+
+V determines WHAT information is transferred.
+```
