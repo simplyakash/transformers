@@ -490,3 +490,222 @@ Most Popular Libraries:
 Most Common Evaluation:
     Validation Set Metric
 ```
+# Warmup in Transformers
+
+Warmup means:
+
+> Start training with a very small learning rate and gradually increase it to the target learning rate during the first few training steps.
+
+---
+
+# Why Do We Need Warmup?
+
+Transformers are often unstable at the beginning of training.
+
+At the start:
+
+```text
+Randomly initialized layers
+Large gradients
+Unstable updates
+```
+
+If we immediately use a large learning rate:
+
+```text
+Loss may spike
+Training may diverge
+Model may not converge
+```
+
+Warmup helps avoid this.
+
+---
+
+# Example
+
+Suppose target learning rate is:
+
+```text
+5e-5 = 0.00005
+```
+
+Without warmup:
+
+```text
+Step 1: 0.00005
+Step 2: 0.00005
+Step 3: 0.00005
+...
+```
+
+With warmup (10% of training):
+
+```text
+Step 1 : 0.000005
+Step 2 : 0.000010
+Step 3 : 0.000015
+Step 4 : 0.000020
+...
+Step 10: 0.000050
+```
+
+After warmup:
+
+```text
+Use the normal LR schedule
+```
+
+---
+
+# Learning Rate Schedule
+
+```text
+Learning Rate
+
+0.00005 |        /\
+         |       /  \
+         |      /    \
+         |     /      \
+         |    /        \
+         |___/          \____
+
+              Warmup
+```
+
+1. Increase LR gradually.
+2. Reach peak LR.
+3. Decay LR over time.
+
+---
+
+# Warmup Ratio
+
+Instead of specifying steps:
+
+```python
+warmup_ratio = 0.1
+```
+
+means:
+
+```text
+10% of total training steps
+```
+
+Example:
+
+```text
+Total Steps = 10000
+
+Warmup Ratio = 0.1
+
+Warmup Steps = 1000
+```
+
+---
+
+# Warmup Steps
+
+Directly specify:
+
+```python
+warmup_steps = 1000
+```
+
+Meaning:
+
+```text
+Increase LR for first 1000 steps
+```
+
+---
+
+# Hugging Face Example
+
+```python
+from transformers import TrainingArguments
+
+training_args = TrainingArguments(
+    learning_rate=5e-5,
+    warmup_ratio=0.1
+)
+```
+
+or
+
+```python
+training_args = TrainingArguments(
+    learning_rate=5e-5,
+    warmup_steps=1000
+)
+```
+
+---
+
+# Numerical Example
+
+Target LR:
+
+```text
+5e-5
+```
+
+Warmup Steps:
+
+```text
+5
+```
+
+Learning rate progression:
+
+| Step | LR |
+|--------|--------|
+| 1 | 1e-5 |
+| 2 | 2e-5 |
+| 3 | 3e-5 |
+| 4 | 4e-5 |
+| 5 | 5e-5 |
+
+After step 5:
+
+```text
+Start decay schedule
+```
+
+---
+
+# Common Values
+
+Typical warmup:
+
+```text
+5%
+10%
+15%
+```
+
+of total training steps.
+
+Most common:
+
+```text
+warmup_ratio = 0.1
+```
+
+---
+
+# Interview Answer
+
+```text
+Warmup is a training technique where the learning rate starts very small and gradually increases to the target learning rate during the initial training steps. It stabilizes Transformer training, prevents large gradient updates at the beginning, and improves convergence. After the warmup phase, the learning rate usually follows a decay schedule such as linear decay or cosine decay.
+```
+
+---
+
+# One-Line Memory Trick
+
+```text
+Warmup =
+"Don't hit the Transformer with the full learning rate on day one."
+```
