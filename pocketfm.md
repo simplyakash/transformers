@@ -423,6 +423,833 @@ Better Generalization
 > **Interviewer:** "Let's move to NLP. Explain tokenization in detail. Why do we need it? Also explain different tokenization algorithms like WordPiece, BPE, and SentencePiece."
 
 ---
+# 🎯 What are Weights in Machine Learning?
+
+A **weight** is a learnable parameter that determines how much importance the model gives to an input feature.
+
+Think of a simple linear model:
+
+```text
+y = w₁x₁ + w₂x₂ + w₃x₃ + b
+```
+
+Where:
+
+- `x₁, x₂, x₃` = input features
+- `w₁, w₂, w₃` = weights
+- `b` = bias
+
+Example:
+
+Suppose we're predicting the price of a house.
+
+```text
+Price
+
+=
+
+(Size × 5000)
+
++
+
+(Bedrooms × 100000)
+
++
+
+(Age × -2000)
+
++
+
+Bias
+```
+
+Here,
+
+```text
+Weight for Size = 5000
+
+Weight for Bedrooms = 100000
+
+Weight for Age = -2000
+```
+
+The weights tell the model **how influential each feature is**.
+
+---
+
+# In Neural Networks
+
+Weights connect neurons.
+
+```
+Input Layer          Hidden Layer
+
+x₁  ● ───(w₁)────► ○
+
+x₂  ● ───(w₂)────► ○
+
+x₃  ● ───(w₃)────► ○
+```
+
+Every connection has a weight.
+
+A modern LLM contains **billions of weights**.
+
+For example,
+
+```
+7 Billion Parameter Model
+
+↓
+
+≈ 7 Billion Weights (plus some biases)
+```
+
+These weights store everything the model has learned:
+
+- Grammar
+- Facts
+- Coding knowledge
+- Reasoning
+- Language patterns
+
+---
+
+# Why Large Weights Can Be a Problem
+
+Suppose we have:
+
+```text
+y = 1000x₁ + 0.1x₂
+```
+
+The model depends almost entirely on `x₁`.
+
+If `x₁` contains noise,
+
+the prediction changes drastically.
+
+Large weights make the model:
+
+- Sensitive to noise
+- Less robust
+- More likely to overfit
+
+---
+
+# What Does L2 Regularization Do?
+
+The loss becomes
+
+```text
+Loss
+
+=
+
+Original Loss
+
++
+
+λ Σ(w²)
+```
+
+Notice:
+
+The optimizer wants to **minimize** the total loss.
+
+If a weight becomes very large,
+
+its square becomes much larger.
+
+Example
+
+```
+Weight = 2
+
+Penalty = 2² = 4
+
+--------------
+
+Weight = 10
+
+Penalty = 10² = 100
+
+--------------
+
+Weight = 20
+
+Penalty = 20² = 400
+```
+
+Large weights are penalized much more than small weights.
+
+---
+
+# But HOW Does the Weight Actually Become Smaller?
+
+This happens through **Gradient Descent**.
+
+The update rule is
+
+```text
+New Weight
+
+=
+
+Old Weight
+
+−
+
+Learning Rate × Gradient
+```
+
+Without L2:
+
+```text
+Loss = Original Loss
+```
+
+Gradient:
+
+```text
+∂Loss/∂w
+```
+
+---
+
+With L2:
+
+```text
+Loss
+
+=
+
+Original Loss
+
++
+
+λw²
+```
+
+Take the derivative.
+
+Derivative of
+
+```text
+λw²
+```
+
+is
+
+```text
+2λw
+```
+
+Therefore,
+
+the total gradient becomes
+
+```text
+Gradient
+
+=
+
+Original Gradient
+
++
+
+2λw
+```
+
+Notice something important:
+
+The extra term
+
+```text
+2λw
+```
+
+always points toward **zero**.
+
+---
+
+# Numerical Example
+
+Suppose
+
+```text
+Weight = 8
+
+Learning Rate = 0.1
+
+Original Gradient = 1
+
+λ = 0.2
+```
+
+Without L2:
+
+```text
+Gradient
+
+=
+
+1
+```
+
+Update
+
+```text
+w
+
+=
+
+8
+
+−
+
+0.1 × 1
+
+=
+
+7.9
+```
+
+---
+
+With L2
+
+Extra Gradient
+
+```text
+2 × 0.2 × 8
+
+=
+
+3.2
+```
+
+Total Gradient
+
+```text
+1 + 3.2
+
+=
+
+4.2
+```
+
+Update
+
+```text
+w
+
+=
+
+8
+
+−
+
+0.1 × 4.2
+
+=
+
+7.58
+```
+
+Notice
+
+```
+Without L2
+
+8
+
+↓
+
+7.9
+
+--------------
+
+With L2
+
+8
+
+↓
+
+7.58
+```
+
+The weight shrinks **much faster**.
+
+---
+
+# Why Doesn't It Become Exactly Zero?
+
+The derivative of `w²` is proportional to `w`:
+
+```text
+d(w²)/dw = 2w
+```
+
+As the weight gets closer to zero,
+
+the gradient also becomes smaller.
+
+Example
+
+```
+Weight = 8
+
+Penalty Gradient = 16
+
+↓
+
+Weight = 2
+
+Penalty Gradient = 4
+
+↓
+
+Weight = 0.5
+
+Penalty Gradient = 1
+
+↓
+
+Weight = 0.1
+
+Penalty Gradient = 0.2
+```
+
+Eventually, the shrinking force becomes very small, so weights approach zero but rarely become exactly zero.
+
+---
+
+# Why Does This Reduce Overfitting?
+
+Imagine fitting a curve.
+
+Without L2:
+
+```
+Training Data
+
+●   ●      ●
+   ●
+
+Curve
+
+~~~~~~~~~~~~~~~
+```
+
+The curve twists to fit every point, including noise.
+
+With L2:
+
+```
+Training Data
+
+●   ●      ●
+   ●
+
+Curve
+
+──────────────
+```
+
+The model is encouraged to use **smaller weights**, producing smoother decision boundaries that generalize better to unseen data.
+
+---
+
+# Interview One-Liner
+
+> "Weights are the learnable parameters that determine the influence of each feature or neuron connection. L2 regularization adds a penalty proportional to the square of the weights to the loss function. During gradient descent, this introduces an additional gradient term `2λw`, which continuously pulls weights toward zero. Because large weights incur a much larger penalty than small ones, the optimizer naturally prefers smaller weights, reducing model complexity and improving generalization."
+
+# 🎯 Why Does L1 Regularization Make Some Weights Exactly Zero?
+
+Recall the L1 loss function:
+
+```text
+Loss
+
+=
+
+Original Loss
+
++
+
+λ Σ|w|
+```
+
+Unlike L2, L1 penalizes the **absolute value** of the weights.
+
+---
+
+# Step 1: What is the Gradient of L1?
+
+For L2:
+
+```text
+Penalty = λw²
+
+Derivative = 2λw
+```
+
+Notice that the gradient depends on the value of `w`.
+
+As `w` gets smaller, the gradient also gets smaller.
+
+---
+
+For L1:
+
+```text
+Penalty = λ|w|
+```
+
+The derivative is:
+
+```text
+        +λ    if w > 0
+
+d|w| =
+        -λ    if w < 0
+
+Undefined at w = 0
+```
+
+Or equivalently:
+
+```text
+d|w| = λ × sign(w)
+```
+
+where
+
+```text
+sign(w)
+
+=
+
++1   if w > 0
+
+-1   if w < 0
+
+0    if w = 0   (subgradient)
+```
+
+The important observation is:
+
+> **The gradient has a constant magnitude (λ), regardless of how small the weight is.**
+
+---
+
+# Step 2: Compare L1 and L2
+
+Suppose
+
+```text
+Weight = 10
+```
+
+L2 gradient:
+
+```text
+2 × 10 = 20
+```
+
+L1 gradient:
+
+```text
+1
+```
+
+---
+
+Now suppose
+
+```text
+Weight = 0.1
+```
+
+L2 gradient:
+
+```text
+2 × 0.1 = 0.2
+```
+
+L1 gradient:
+
+```text
+1
+```
+
+Notice the difference:
+
+```
+Weight      L2 Gradient      L1 Gradient
+
+10              20               1
+
+1                2               1
+
+0.1            0.2               1
+
+0.01          0.02               1
+```
+
+L2's shrinking force becomes weaker as the weight approaches zero.
+
+L1 keeps applying the same-sized push toward zero.
+
+---
+
+# Step 3: Numerical Example
+
+Suppose
+
+```text
+Weight = 0.08
+
+Learning Rate = 0.1
+
+λ = 0.5
+```
+
+Ignoring the data-loss gradient for simplicity:
+
+The L1 update is
+
+```text
+w_new
+
+=
+
+w_old
+
+−
+
+η × λ
+
+=
+
+0.08
+
+−
+
+0.1 × 0.5
+
+=
+
+0.03
+```
+
+Next step:
+
+```text
+0.03
+
+−
+
+0.05
+
+=
+
+-0.02
+```
+
+The optimizer doesn't usually let the weight oscillate through zero. In practice (using subgradients or proximal methods), it is **clipped to exactly zero**.
+
+So:
+
+```
+0.08
+
+↓
+
+0.03
+
+↓
+
+0.00 ✅
+```
+
+---
+
+# L2 Example
+
+Start with the same weight:
+
+```text
+Weight = 0.08
+```
+
+Gradient:
+
+```text
+2w
+
+=
+
+0.16
+```
+
+Update:
+
+```text
+0.08
+
+−
+
+0.1 × 0.16
+
+=
+
+0.064
+```
+
+Next:
+
+```text
+0.064
+
+↓
+
+0.0512
+
+↓
+
+0.041
+
+↓
+
+0.033
+
+↓
+
+...
+```
+
+It keeps getting smaller but rarely reaches exactly zero.
+
+---
+
+# Visual Intuition
+
+## L2 Penalty
+
+```
+Penalty
+  ▲
+  │
+  │      ╭───╮
+  │    ╱       ╲
+  │  ╱           ╲
+──┼──────────────────► Weight
+```
+
+This curve is smooth.
+
+Near zero, the slope is also close to zero.
+
+So the optimizer loses the "force" needed to eliminate weights.
+
+---
+
+## L1 Penalty
+
+```
+Penalty
+  ▲
+  │
+  │     ╱
+  │    ╱
+──┼───┼────────► Weight
+  │    ╲
+  │     ╲
+```
+
+The sharp corner at zero means there is always pressure toward the origin from either side.
+
+This encourages exact zeros.
+
+---
+
+# Geometric Intuition (Very Common Interview Question)
+
+Suppose the optimizer is minimizing the loss while staying within a regularization constraint.
+
+### L2 Constraint
+
+```
+      ○
+   ○     ○
+ ○         ○
+○     ●     ○
+ ○         ○
+   ○     ○
+      ○
+```
+
+The constraint is a **circle**.
+
+The optimum usually touches the smooth boundary away from the axes.
+
+Weights become small but are rarely zero.
+
+---
+
+### L1 Constraint
+
+```
+        ▲
+       / \
+      /   \
+◄────●────►
+      \   /
+       \ /
+        ▼
+```
+
+The constraint is a **diamond**.
+
+Its corners lie on the coordinate axes, where one or more weights are exactly zero.
+
+The optimum is much more likely to land on a corner.
+
+This is the geometric reason why L1 produces sparse solutions.
+
+---
+
+# Why Is Sparsity Useful?
+
+Imagine you have 1,000,000 features:
+
+```
+Before L1
+
+[0.8, 0.2, 1.1, 0.03, 0.9, 0.01, 0.0...]
+
+↓
+
+After L1
+
+[0.7, 0, 1.0, 0, 0.8, 0, 0...]
+```
+
+Benefits:
+
+- ✅ Automatic feature selection
+- ✅ Smaller model
+- ✅ Faster inference
+- ✅ Better interpretability
+- ✅ Can reduce overfitting
+
+---
+
+# Interview Answer (30 Seconds)
+
+> "L1 regularization adds the absolute value of the weights to the loss. Its gradient is proportional to the sign of the weight, so it has a nearly constant magnitude regardless of how close the weight is to zero. Unlike L2, whose shrinking force becomes weaker near zero, L1 keeps pushing small weights toward zero. In optimization, this causes many unimportant weights to become exactly zero, producing sparse models and performing automatic feature selection."
 
 # ❓Q1. What is Tokenization?
 
