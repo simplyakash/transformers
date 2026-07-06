@@ -2437,3 +2437,446 @@ Preference optimization then makes responses more engaging, safe, and aligned wi
 # 🎯 60-Second Interview Answer
 
 > "A modern LLM is typically trained in three stages. **Pre-training** teaches the model language, reasoning, and world knowledge by predicting the next token on trillions of tokens from books, web pages, code, and other public text. **Mid-training**, also called continued pre-training, further adapts the model to a specific domain—such as medicine, law, finance, or storytelling—while keeping the same next-token prediction objective. **Post-training** aligns the model with human expectations using supervised fine-tuning on instruction-response pairs and preference optimization techniques like RLHF or DPO. Pre-training builds knowledge, mid-training specializes that knowledge, and post-training teaches the model how to behave as a helpful, safe, and conversational assistant."
+
+# 🎤 Interview Question
+
+**Design a Recommendation System for Pocket FM (Songs / Audiobooks / Episodes)**
+
+---
+
+# High-Level Architecture
+
+```text
+                  User Opens App
+                         │
+                         ▼
+              User Features + Context
+                         │
+                         ▼
+              Candidate Generation
+             (Retrieve ~1000 Items)
+                         │
+                         ▼
+                 Ranking Model
+             (Rank Top 100 Items)
+                         │
+                         ▼
+               Re-ranking Layer
+       (Diversity + Freshness + Business Rules)
+                         │
+                         ▼
+                 Top 20 Recommendations
+```
+
+---
+
+# Step 1: Candidate Generation
+
+The goal is to quickly retrieve a few hundred or thousand potentially relevant items from millions of songs or episodes.
+
+### Common approaches
+
+## 1. Collaborative Filtering
+
+Users with similar listening behavior tend to like similar content.
+
+Example
+
+```
+User A
+
+Episode 1
+Episode 2
+Episode 5
+
+User B
+
+Episode 1
+Episode 2
+Episode 8
+
+↓
+
+Recommend Episode 8 to User A
+```
+
+### Algorithms
+
+- Matrix Factorization
+- Two-Tower Networks
+- Neural Collaborative Filtering
+
+---
+
+## 2. Content-Based Filtering
+
+Recommend items similar to what the user already likes.
+
+Example
+
+```
+User likes
+
+Horror
+Mystery
+Thriller
+
+↓
+
+Recommend
+
+Crime Podcasts
+Suspense Stories
+```
+
+Features
+
+- Genre
+- Author
+- Language
+- Duration
+- Tags
+- Description Embeddings
+
+---
+
+## 3. Embedding Retrieval (Most Common Today)
+
+Represent users and items as vectors.
+
+```
+User Embedding
+
+↓
+
+[0.2, 0.8, ...]
+
+Episode Embedding
+
+↓
+
+[0.21, 0.75, ...]
+
+↓
+
+Cosine Similarity
+
+↓
+
+High Score
+```
+
+Nearest-neighbor search retrieves similar content.
+
+Tools:
+
+- FAISS
+- ScaNN
+- HNSW
+
+---
+
+# Step 2: Ranking
+
+Now we have ~1000 candidates.
+
+We need to rank them.
+
+Use a Learning-to-Rank model.
+
+Example features:
+
+User Features
+
+- Age
+- Language
+- Listening history
+- Preferred genres
+- Average session length
+- Time of day
+
+Episode Features
+
+- Genre
+- Popularity
+- Release date
+- Completion rate
+- Average rating
+
+Interaction Features
+
+- User likes horror
+- Episode is horror
+- Same narrator
+- Similar embedding
+- Previously listened to related episodes
+
+---
+
+# Ranking Models
+
+Common choices:
+
+- XGBoost
+- LightGBM
+- Deep Neural Networks
+- Wide & Deep Models
+- DeepFM
+- Transformer-based ranking (for large-scale systems)
+
+Prediction target:
+
+```
+P(User Clicks Episode)
+```
+
+or
+
+```
+Expected Watch Time
+```
+
+or
+
+```
+Completion Probability
+```
+
+---
+
+# Step 3: Re-ranking
+
+The highest-scoring items may all be from the same genre.
+
+Example:
+
+```
+Top 10
+
+Crime
+Crime
+Crime
+Crime
+Crime
+Crime
+Crime
+Crime
+Crime
+Crime
+```
+
+Poor user experience.
+
+Re-ranking introduces:
+
+- Diversity
+- Freshness
+- New releases
+- Different creators
+- Business priorities (e.g., promote exclusive content)
+
+Final list:
+
+```
+Crime
+
+Romance
+
+Comedy
+
+Mystery
+
+Sci-Fi
+
+Crime
+
+Motivational
+```
+
+---
+
+# Cold Start Problem
+
+## New User
+
+No listening history.
+
+Solutions:
+
+- Ask onboarding questions (favorite genres, languages)
+- Use demographic or location signals
+- Recommend trending content
+- Recommend editor's picks
+
+---
+
+## New Episode
+
+No interactions yet.
+
+Solutions:
+
+Use content features:
+
+- Description embeddings
+- Genre
+- Narrator
+- Author
+- Tags
+- Similarity to existing episodes
+
+---
+
+# What Embeddings Would You Use?
+
+For textual metadata (title, description):
+
+- Sentence Transformers
+- BERT embeddings
+- Modern embedding models (e.g., OpenAI, Jina, BGE, E5)
+
+For user behavior:
+
+Learn user embeddings from:
+
+- Listening history
+- Search queries
+- Likes
+- Skips
+- Completion rate
+
+---
+
+# Important Features
+
+User Features
+
+- Preferred language
+- Favorite genres
+- Listening time
+- Device
+- Subscription type
+- Time of day
+- Day of week
+
+Episode Features
+
+- Genre
+- Duration
+- Author
+- Narrator
+- Popularity
+- Freshness
+- Completion rate
+
+Behavior Features
+
+- Click-through rate (CTR)
+- Average listening duration
+- Skip rate
+- Likes
+- Shares
+- Replays
+
+---
+
+# Online Feedback
+
+The system should continuously learn from user behavior.
+
+Positive Signals
+
+- Played
+- Finished episode
+- Liked
+- Shared
+- Added to playlist
+
+Negative Signals
+
+- Skipped
+- Stopped after a few seconds
+- Disliked
+- Hid content
+
+These signals update user embeddings and ranking models over time.
+
+---
+
+# Evaluation Metrics
+
+Offline Metrics
+
+- Precision@K
+- Recall@K
+- NDCG
+- MAP
+- MRR
+
+Online Metrics
+
+- CTR (Click Through Rate)
+- Watch/Listen Time
+- Completion Rate
+- Daily Active Users
+- Session Length
+- Retention
+- Revenue
+
+---
+
+# Tech Stack
+
+Storage
+
+- User profiles
+- Episode metadata
+- Interaction logs
+
+Feature Store
+
+- Feast (or equivalent)
+
+Vector Database / ANN Search
+
+- FAISS
+- HNSW
+- ScaNN
+
+Model Serving
+
+- TensorFlow Serving
+- TorchServe
+- Triton Inference Server
+
+Streaming
+
+- Kafka
+
+Monitoring
+
+- Prometheus
+- Grafana
+
+---
+
+# If They Ask: "Would you use Collaborative Filtering or Content-Based Filtering?"
+
+A strong answer is:
+
+> "Neither alone. I'd build a hybrid recommendation system. Collaborative filtering captures user behavior patterns, while content-based filtering helps with cold-start items. Candidate generation would use embeddings and collaborative filtering, followed by a learning-to-rank model and a re-ranking stage for diversity and business constraints."
+
+---
+
+# Pocket FM-Specific Improvements
+
+Since Pocket FM focuses on long-form audio, I would optimize for **long-term engagement**, not just clicks.
+
+Instead of predicting only CTR, I'd predict:
+
+- Probability of starting an episode
+- Probability of completing the episode
+- Expected listening time
+- Probability of returning the next day (retention)
+
+This better aligns the recommendation system with the platform's business goals.
