@@ -1678,3 +1678,399 @@ It depends on the application:
 - Precision focuses on the **quality** of the returned results.
 - Recall focuses on the **coverage** of all relevant results.
 - Improving one metric can sometimes reduce the other, so ranking systems often optimize a balance of both.
+
+
+
+# 📚 Are Precision@K and Recall@K Calculated Differently in Retrieval and Recommendation?
+
+**Short Answer:**
+
+> **No.** The mathematical formulas for **Precision@K** and **Recall@K** are **exactly the same** in both **Retrieval Systems** and **Recommendation Systems**.
+
+The **difference is not in the formulas**, but in **how we define a "relevant" item** and **how we obtain the ground truth**.
+
+---
+
+# 📖 Mathematical Formulas
+
+## Precision@K
+
+Measures:
+
+> **Out of the Top K items returned, how many are actually relevant?**
+
+Formula
+
+$\text{Precision@K}=\frac{\text{Number of Relevant Items in Top K}}{K}$
+
+---
+
+## Recall@K
+
+Measures:
+
+> **Out of all relevant items that exist, how many did we retrieve in the Top K?**
+
+Formula
+
+$\text{Recall@K}=\frac{\text{Number of Relevant Items in Top K}}{\text{Total Number of Relevant Items}}$
+
+---
+
+# 🎯 The Key Difference
+
+The **calculation remains identical**.
+
+The **meaning of "relevant" changes** depending on the application.
+
+| System | What is a "Relevant Item"? |
+|---------|----------------------------|
+| Information Retrieval | A document that correctly answers the query |
+| Search Engine | A webpage that satisfies the search intent |
+| RAG Retriever | A chunk/document containing information needed to answer the question |
+| Recommendation System | An item the user is likely to click, watch, purchase, or enjoy |
+
+---
+
+# 🔍 Case 1: Information Retrieval
+
+Suppose we have a document database.
+
+User searches
+
+```text
+"What is Self-Supervised Learning?"
+```
+
+The database contains
+
+```text
+1000 documents
+```
+
+Among them,
+
+```text
+50 documents
+```
+
+actually answer the query.
+
+These **50 documents** are the **ground truth relevant documents**.
+
+---
+
+## Retriever Output
+
+Top 10 documents returned
+
+```text
+D1 ✅
+D2 ✅
+D3 ❌
+D4 ✅
+D5 ❌
+D6 ❌
+D7 ✅
+D8 ❌
+D9 ❌
+D10 ✅
+```
+
+Relevant retrieved
+
+```text
+5
+```
+
+---
+
+## Precision@10
+
+$\text{Precision@10}=\frac{5}{10}=0.5$
+
+Meaning
+
+> **50% of the returned documents were relevant.**
+
+---
+
+## Recall@10
+
+$\text{Recall@10}=\frac{5}{50}=0.10$
+
+Meaning
+
+> **Only 10% of all relevant documents were retrieved.**
+
+---
+
+# 🎬 Case 2: Recommendation Systems
+
+Suppose Netflix has
+
+```text
+1,000,000 movies
+```
+
+The user eventually watches and enjoys
+
+```text
+20 movies
+```
+
+These become our **relevant items** (ground truth).
+
+The recommender suggests
+
+```text
+Top 10 Movies
+```
+
+The user actually watches
+
+```text
+4
+```
+
+of them.
+
+---
+
+## Precision@10
+
+$\text{Precision@10}=\frac{4}{10}=0.40$
+
+Meaning
+
+> **40% of the recommended movies were relevant to the user.**
+
+---
+
+## Recall@10
+
+$\text{Recall@10}=\frac{4}{20}=0.20$
+
+Meaning
+
+> **The recommender found 20% of all the movies the user would eventually watch.**
+
+---
+
+# 📊 Side-by-Side Comparison
+
+| Metric | Retrieval | Recommendation |
+|----------|-----------|----------------|
+| Precision@10 | $\frac{\text{Relevant Documents Retrieved}}{10}$ | $\frac{\text{Relevant Items Recommended}}{10}$ |
+| Recall@10 | $\frac{\text{Relevant Documents Retrieved}}{\text{Total Relevant Documents}}$ | $\frac{\text{Relevant Items Recommended}}{\text{Total Relevant Items}}$ |
+
+Notice that **the equations are identical**.
+
+---
+
+# 🤔 Where Does the Difference Actually Come From?
+
+The biggest difference is **how we determine the ground truth (relevant items).**
+
+## 📚 Retrieval
+
+Ground truth is usually available.
+
+It comes from
+
+- Human annotations
+- Benchmark datasets
+- Search relevance judgments
+- QA datasets
+
+Example
+
+```text
+Query
+
+↓
+
+Human annotators label
+which documents are relevant.
+```
+
+So we know exactly
+
+```text
+Total Relevant Documents = 50
+```
+
+---
+
+## 🎬 Recommendation
+
+Ground truth is usually **not known beforehand**.
+
+Instead, it is inferred from user behavior.
+
+Examples
+
+- Movies watched
+- Songs played
+- Products purchased
+- Ads clicked
+- Videos liked
+- Watch time
+
+Pipeline
+
+```text
+Recommend Items
+
+↓
+
+User Interacts
+
+↓
+
+Interaction Logs Become Ground Truth
+```
+
+So the "relevant items" are discovered **after** observing user interactions.
+
+---
+
+# 🎯 Why Is Recall More Challenging in Recommendation?
+
+Imagine YouTube.
+
+```text
+100 Million Videos
+```
+
+How many videos would a user actually enjoy?
+
+There is no perfect answer.
+
+The user may never see many videos they would have liked.
+
+Therefore, recommendation systems often define relevance using historical interactions over a fixed evaluation period.
+
+Example
+
+```text
+Recommended Today
+
+↓
+
+User Watches During Next Week
+
+↓
+
+Watched Videos = Relevant Items
+```
+
+Unlike retrieval, the complete set of relevant items is often **unknown**.
+
+---
+
+# 🤖 Precision and Recall in RAG
+
+A Retrieval-Augmented Generation (RAG) system has **two stages**.
+
+## Stage 1 — Retriever
+
+```text
+Question
+
+↓
+
+Retriever
+
+↓
+
+Relevant Documents
+```
+
+Metrics
+
+- Precision@K
+- Recall@K
+- MRR
+- nDCG
+- Hit Rate
+
+---
+
+## Stage 2 — Generator
+
+```text
+Retrieved Documents
+
+↓
+
+LLM
+
+↓
+
+Final Answer
+```
+
+Metrics
+
+- Exact Match (EM)
+- F1 Score
+- ROUGE
+- BLEU
+- Human Evaluation
+- Faithfulness
+- Answer Relevancy
+
+A retriever may have excellent Recall@K, but if the LLM misinterprets the retrieved context, the final answer can still be incorrect.
+
+---
+
+# 📊 Practical Comparison
+
+| Aspect | Retrieval | Recommendation |
+|--------|-----------|----------------|
+| User provides | Explicit query | User profile/history |
+| Goal | Find relevant documents | Predict user preferences |
+| Relevant item | Matches the query | User will interact with it |
+| Ground truth | Usually human-labeled | Usually inferred from user behavior |
+| Precision formula | Same | Same |
+| Recall formula | Same | Same |
+| Typical datasets | MS MARCO, BEIR, TREC | MovieLens, Netflix, Amazon Reviews |
+| Main challenge | Matching query intent | Predicting future interests |
+
+---
+
+# 🧠 Interview Perspective
+
+## Q1. Are Precision@K and Recall@K calculated differently in retrieval and recommendation systems?
+
+> **No.** The mathematical definitions are exactly the same in both domains. The difference lies in how "relevant" items are defined and how the ground truth is obtained.
+
+---
+
+## Q2. What is considered a relevant item?
+
+### Retrieval
+
+A document that correctly answers the user's query.
+
+### Recommendation
+
+An item that the user is likely to interact with, such as clicking, watching, purchasing, or liking.
+
+---
+
+## Q3. Why is Recall harder to estimate in recommendation systems?
+
+Because we usually **do not know every item the user would have liked**. We only observe the items the user interacted with, making the true set of relevant items incomplete.
+
+---
+
+# 📝 Key Takeaways
+
+- ✅ **Precision@K and Recall@K use the same mathematical formulas** in retrieval and recommendation systems.
+- ✅ The main difference is the **definition of relevance**.
+- ✅ Retrieval uses an **explicit query**, while recommendation uses **implicit user preferences**.
+- ✅ Retrieval often has **human-labeled relevance judgments**, whereas recommendation typically relies on **historical user interactions**.
+- ✅ In recommendation systems, the complete set of relevant items is often unknown, making Recall more difficult to estimate accurately.
+- ✅ In RAG systems, Precision@K and Recall@K evaluate the **retriever**, while the **generator** is evaluated using answer-quality metrics such as Exact Match, F1, ROUGE, BLEU, and human evaluation.
