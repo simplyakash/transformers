@@ -1201,3 +1201,480 @@ Horizontal
 **BatchNorm = Normalize columns**
 
 **LayerNorm = Normalize rows**
+
+
+# 🎯 Precision@K vs Recall@K
+
+Both **Precision@K** and **Recall@K** are ranking metrics used in:
+
+- Recommendation Systems
+- Search Engines
+- Information Retrieval
+- LLM Retrieval (RAG)
+- Content Ranking
+- Ads Ranking
+
+Although they sound similar, they answer **different questions**.
+
+---
+
+# 📌 Intuition
+
+Imagine Netflix recommends **10 movies** to a user.
+
+Some of them are actually relevant to the user, and some are not.
+
+Now we ask two different questions.
+
+### Precision@K asks
+
+> **Out of the Top K items I recommended, how many were actually relevant?**
+
+### Recall@K asks
+
+> **Out of ALL the relevant items that exist, how many did I successfully recommend in the Top K?**
+
+---
+
+# 📊 Example
+
+Suppose there are **20 movies** in the database.
+
+The user actually likes **8** of them.
+
+Those relevant movies are
+
+```text
+A B C D E F G H
+```
+
+The recommender returns the **Top 5**
+
+```text
+A C X Y Z
+```
+
+where
+
+- A ✅ Relevant
+- C ✅ Relevant
+- X ❌ Not Relevant
+- Y ❌ Not Relevant
+- Z ❌ Not Relevant
+
+---
+
+# Step 1: Count Relevant Recommendations
+
+Relevant recommendations returned
+
+```text
+A
+C
+```
+
+Total relevant returned = **2**
+
+---
+
+# 📌 Precision@5
+
+Formula
+
+$\text{Precision@K}=\frac{\text{Relevant items in Top K}}{K}$
+
+Here
+
+Relevant returned = **2**
+
+K = **5**
+
+Therefore
+
+$\text{Precision@5}=\frac{2}{5}=0.40$
+
+or
+
+```text
+40%
+```
+
+Meaning
+
+> **40% of the recommendations shown to the user were relevant.**
+
+---
+
+# 📌 Recall@5
+
+Formula
+
+$\text{Recall@K}=\frac{\text{Relevant items in Top K}}{\text{Total Relevant Items}}$
+
+Here
+
+Relevant returned = **2**
+
+Total relevant items = **8**
+
+Therefore
+
+$\text{Recall@5}=\frac{2}{8}=0.25$
+
+or
+
+```text
+25%
+```
+
+Meaning
+
+> **The system found only 25% of all the items the user would have liked.**
+
+---
+
+# 📊 Visual Explanation
+
+Actual relevant movies
+
+```text
+A  B  C  D  E  F  G  H
+```
+
+Recommended Top 5
+
+```text
+A  C  X  Y  Z
+```
+
+Overlap
+
+```text
+A  C
+```
+
+Precision
+
+```text
+Relevant Returned
+-----------------
+Total Returned
+
+= 2 / 5
+```
+
+Recall
+
+```text
+Relevant Returned
+------------------
+Total Relevant
+
+= 2 / 8
+```
+
+---
+
+# 🎯 Another Example
+
+Suppose
+
+The user likes
+
+```text
+A B C D
+```
+
+Your model recommends
+
+```text
+A B C D E
+```
+
+### Precision@5
+
+Relevant returned = **4**
+
+Recommended = **5**
+
+$\text{Precision@5}=\frac{4}{5}=0.80$
+
+---
+
+### Recall@5
+
+Relevant returned = **4**
+
+Actual relevant = **4**
+
+$\text{Recall@5}=1.0$
+
+Perfect recall.
+
+---
+
+# 🎯 Another Example
+
+User likes
+
+```text
+A B C D E
+```
+
+Recommendations
+
+```text
+A B C
+```
+
+Precision@3
+
+Relevant returned = **3**
+
+Recommended = **3**
+
+$\text{Precision@3}=1.0$
+
+Perfect precision.
+
+Recall@3
+
+Relevant returned = **3**
+
+Actual relevant = **5**
+
+$\text{Recall@3}=\frac{3}{5}=0.60$
+
+The recommendations shown are all relevant, but two relevant items were missed.
+
+---
+
+# 🎯 Extreme Cases
+
+## High Precision, Low Recall
+
+Recommendations
+
+```text
+A
+```
+
+Only one movie recommended.
+
+It is relevant.
+
+Precision
+
+```text
+1 / 1 = 100%
+```
+
+Recall
+
+Suppose there are 20 relevant movies.
+
+```text
+1 / 20 = 5%
+```
+
+Interpretation
+
+- Almost everything recommended is correct.
+- But many relevant items were never recommended.
+
+---
+
+## Low Precision, High Recall
+
+Recommend
+
+```text
+100 movies
+```
+
+Suppose
+
+80 are relevant.
+
+Precision
+
+```text
+80 / 100 = 80%
+```
+
+If there are exactly 80 relevant movies in the catalog
+
+Recall
+
+```text
+80 / 80 = 100%
+```
+
+Interpretation
+
+- You found every relevant item.
+- But you also recommended many unnecessary items.
+
+> **Note:** If there are more than 80 relevant items in total, the recall would be less than 100%.
+
+---
+
+# 📈 Precision vs Recall
+
+| Precision | Recall |
+|------------|---------|
+| Measures recommendation quality | Measures recommendation coverage |
+| Focuses on returned items | Focuses on all relevant items |
+| Higher means fewer false positives | Higher means fewer false negatives |
+| Important when wrong recommendations are costly | Important when missing relevant items is costly |
+
+---
+
+# 📌 Mathematical Formulas
+
+Precision@K
+
+$\text{Precision@K}=\frac{\text{Relevant items in Top K}}{K}$
+
+Recall@K
+
+$\text{Recall@K}=\frac{\text{Relevant items in Top K}}{\text{Total Relevant Items}}$
+
+---
+
+# 🎬 Recommendation System Example
+
+Suppose a user has watched and liked
+
+```text
+Harry Potter
+Interstellar
+Inception
+Titanic
+Avatar
+```
+
+The recommendation system predicts
+
+```text
+Interstellar
+Avatar
+Frozen
+Cars
+Toy Story
+```
+
+Relevant recommendations
+
+```text
+Interstellar
+Avatar
+```
+
+Precision@5
+
+$\frac{2}{5}=40\%$
+
+Recall@5
+
+$\frac{2}{5}=40\%$
+
+In this example, the user likes exactly five movies, so the denominator for Recall is also five.
+
+---
+
+# 🔍 Search Engine Example
+
+Search query
+
+```text
+Machine Learning Books
+```
+
+Suppose there are **100 relevant books** in the index.
+
+Google returns
+
+Top 10
+
+```text
+9 Relevant
+1 Irrelevant
+```
+
+Precision@10
+
+$\frac{9}{10}=90\%$
+
+Recall@10
+
+$\frac{9}{100}=9\%$
+
+Interpretation
+
+Google returned very high-quality results, but only a small fraction of all relevant books.
+
+---
+
+# 🤖 Why Recommendation Systems Use Both
+
+If you optimize only Precision:
+
+- You may recommend only a few "safe" items.
+- Users miss many other relevant items.
+
+If you optimize only Recall:
+
+- You may recommend too many items.
+- The list becomes noisy and less useful.
+
+A good ranking system aims to balance both metrics.
+
+---
+
+# 🧠 Interview Questions
+
+## Q1. What does Precision@K measure?
+
+> Precision@K measures the fraction of the **Top K recommended items** that are actually relevant.
+
+Formula
+
+$\text{Precision@K}=\frac{\text{Relevant items in Top K}}{K}$
+
+---
+
+## Q2. What does Recall@K measure?
+
+> Recall@K measures the fraction of **all relevant items** that appear within the Top K recommendations.
+
+Formula
+
+$\text{Recall@K}=\frac{\text{Relevant items in Top K}}{\text{Total Relevant Items}}$
+
+---
+
+## Q3. Can a model have high Precision but low Recall?
+
+Yes.
+
+For example, recommending only one highly relevant item can produce **100% Precision**, but if many other relevant items exist, the Recall will be low.
+
+---
+
+## Q4. Which metric is more important?
+
+It depends on the application:
+
+- **Precision@K** is more important when users only look at the first few results (e.g., homepage recommendations or top search results).
+- **Recall@K** is more important when finding as many relevant items as possible matters (e.g., document retrieval, medical search, or the retrieval stage of a RAG pipeline).
+
+---
+
+# 📝 Key Takeaways
+
+- **Precision@K** answers: **"Of the Top K items shown, how many are relevant?"**
+- **Recall@K** answers: **"Of all the relevant items available, how many did we retrieve in the Top K?"**
+- Precision focuses on the **quality** of the returned results.
+- Recall focuses on the **coverage** of all relevant results.
+- Improving one metric can sometimes reduce the other, so ranking systems often optimize a balance of both.
