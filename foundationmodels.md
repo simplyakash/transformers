@@ -1,3 +1,556 @@
+# 🏛️ Foundation Models
+
+Foundation Models are **large machine learning models** trained on **massive amounts of diverse data** using **self-supervised learning**. Instead of being designed for one specific task, they learn **general-purpose representations** that can later be adapted to many downstream applications through prompting, fine-tuning, or parameter-efficient methods.
+
+> **Definition:** A Foundation Model is a model trained on broad, large-scale data using self-supervised learning that serves as a common foundation for a wide variety of downstream tasks.
+
+---
+
+# 💡 Why Are They Called Foundation Models?
+
+They are called **Foundation Models** because they act as the **foundation** upon which many AI applications are built.
+
+Instead of training a separate model for every task, we first train one powerful general-purpose model and then adapt it for different applications.
+
+```text
+                    Internet-Scale Data
+                           │
+                           ▼
+                 Large-Scale Pretraining
+                           │
+                           ▼
+                   Foundation Model
+         ┌──────────┼──────────┬──────────┐
+         ▼          ▼          ▼          ▼
+     Chatbots    Coding     Search     Vision
+```
+
+---
+
+# 🎯 Key Characteristics
+
+Most foundation models have the following properties:
+
+- Trained on billions or trillions of tokens/images/audio samples
+- Usually contain millions to hundreds of billions of parameters
+- Trained using **Self-Supervised Learning (SSL)**
+- Learn general-purpose representations
+- Can be adapted to many downstream tasks
+- Support Zero-Shot, One-Shot, and Few-Shot learning
+- Can be further improved through fine-tuning
+
+---
+
+# 🏗️ General Training Pipeline
+
+```text
+                 Massive Raw Data
+                       │
+                       ▼
+                 Data Cleaning
+                       │
+                       ▼
+                Tokenization / Encoding
+                       │
+                       ▼
+             Self-Supervised Learning
+                       │
+                       ▼
+                Foundation Model
+                       │
+          ┌────────────┼────────────┐
+          ▼            ▼            ▼
+      Prompting   Fine-Tuning    PEFT (LoRA)
+```
+
+---
+
+# 🌍 Major Types of Foundation Models
+
+## 1. Large Language Models (LLMs)
+
+These models understand and generate human language.
+
+### Input
+
+```text
+Text
+```
+
+### Output
+
+```text
+Generated Text
+```
+
+### Examples
+
+- GPT
+- Llama
+- Gemma
+- Qwen
+- Mistral
+- DeepSeek
+
+### Applications
+
+- Chatbots
+- Code generation
+- Summarization
+- Translation
+- Question Answering
+- Document Analysis
+
+---
+
+## 2. Vision Foundation Models
+
+These models learn visual representations from images.
+
+### Input
+
+```text
+Images
+```
+
+### Output
+
+```text
+Embeddings
+Classification
+Detection
+Segmentation
+```
+
+### Examples
+
+- Vision Transformer (ViT)
+- DINOv2
+- SAM (Segment Anything Model)
+- CLIP
+- MAE
+
+### Applications
+
+- Image Classification
+- Object Detection
+- Image Segmentation
+- Medical Imaging
+- Visual Search
+
+---
+
+## 3. Vision-Language (Multimodal) Models
+
+These models jointly understand images and text.
+
+### Input
+
+```text
+Image + Text
+```
+
+### Output
+
+```text
+Generated Text
+```
+
+### Examples
+
+- GPT-4o
+- LLaVA
+- BLIP
+- Flamingo
+
+### Applications
+
+- Visual Question Answering
+- Image Captioning
+- OCR
+- Chart Understanding
+- Image Search
+
+---
+
+## 4. Speech Foundation Models
+
+These models learn speech representations.
+
+### Input
+
+```text
+Speech
+```
+
+### Output
+
+```text
+Text
+Embeddings
+```
+
+### Examples
+
+- Whisper
+- wav2vec 2.0
+- SeamlessM4T
+
+### Applications
+
+- Speech Recognition
+- Translation
+- Speaker Identification
+- Voice Assistants
+
+---
+
+## 5. Video Foundation Models
+
+These models understand video sequences.
+
+### Input
+
+```text
+Video
+```
+
+### Output
+
+```text
+Captions
+Actions
+Embeddings
+```
+
+### Examples
+
+- VideoMAE
+- Video-LLaMA
+- Sora
+
+### Applications
+
+- Video Retrieval
+- Action Recognition
+- Video Summarization
+- Video Generation
+
+---
+
+# 🧠 Why Self-Supervised Learning?
+
+Creating labeled datasets is expensive.
+
+Instead of manually labeling billions of examples, foundation models automatically generate learning targets from the data itself.
+
+Example
+
+Original sentence
+
+```text
+The cat sat on the mat.
+```
+
+Training sample
+
+```text
+The cat sat on the _____
+```
+
+Target
+
+```text
+mat
+```
+
+No human labels are needed.
+
+---
+
+# 📚 Training Objectives
+
+Different foundation models use different self-supervised objectives.
+
+| Model Family | Training Objective |
+|--------------|--------------------|
+| GPT | Next Token Prediction |
+| BERT | Masked Language Modeling |
+| MAE | Masked Image Reconstruction |
+| DINOv2 | Self-Distillation |
+| CLIP | Contrastive Learning |
+| Whisper | Sequence Prediction During Pretraining |
+| wav2vec 2.0 | Masked Speech Prediction |
+
+---
+
+# 🚀 Adaptation Methods
+
+Once pretrained, foundation models can be adapted in multiple ways.
+
+## 1. Prompting
+
+No parameters are updated.
+
+```text
+Question
+    │
+    ▼
+Foundation Model
+    │
+    ▼
+Answer
+```
+
+Example
+
+```
+Translate this sentence into French.
+```
+
+---
+
+## 2. Zero-Shot Learning
+
+The model performs a task without seeing any task-specific examples.
+
+Example
+
+```
+Classify this review as positive or negative.
+```
+
+---
+
+## 3. One-Shot Learning
+
+The model is given a single example before solving the task.
+
+Example
+
+```
+Example:
+Apple → Fruit
+
+Now classify:
+Banana → ?
+```
+
+---
+
+## 4. Few-Shot Learning
+
+A few examples are provided in the prompt.
+
+```text
+Positive:
+I love this movie.
+
+Negative:
+This movie is terrible.
+
+Review:
+Amazing acting!
+
+Answer:
+Positive
+```
+
+---
+
+## 5. Fine-Tuning
+
+The pretrained model is trained further on a labeled dataset for a specific task.
+
+```text
+Foundation Model
+        │
+        ▼
+Task-Specific Dataset
+        │
+        ▼
+Fine-Tuned Model
+```
+
+Examples
+
+- Medical Diagnosis
+- Legal AI
+- Customer Support
+- Financial Analysis
+
+---
+
+## 6. Parameter-Efficient Fine-Tuning (PEFT)
+
+Instead of updating all parameters, only a small subset is trained.
+
+Popular methods
+
+- LoRA
+- QLoRA
+- Adapters
+- Prefix Tuning
+- Prompt Tuning
+
+Benefits
+
+- Lower GPU memory
+- Faster training
+- Smaller checkpoints
+
+---
+
+# 📊 Foundation Models vs Traditional Machine Learning
+
+| Traditional ML | Foundation Models |
+|----------------|-------------------|
+| One model per task | One model for many tasks |
+| Heavy dependence on labeled data | Mostly self-supervised pretraining |
+| Limited transfer learning | Strong transfer learning |
+| Usually trained from scratch | Adapt pretrained models |
+| Lower training cost | Very high pretraining cost |
+
+---
+
+# 🔄 Traditional AI vs Foundation Models
+
+## Traditional Approach
+
+```text
+Spam Detection ──► Model A
+
+Translation ────► Model B
+
+Chatbot ────────► Model C
+
+Recommendation ─► Model D
+```
+
+Each task requires a separate model.
+
+---
+
+## Foundation Model Approach
+
+```text
+              Foundation Model
+                     │
+     ┌───────────────┼────────────────┐
+     ▼               ▼                ▼
+ Chatbot       Translation      Recommendation
+                     │
+                     ▼
+                Code Generation
+```
+
+One pretrained model supports many tasks.
+
+---
+
+# 🌟 Advantages
+
+- Learns rich semantic representations
+- Supports many downstream tasks
+- Reduces the need for labeled data
+- Enables Zero-Shot and Few-Shot learning
+- High transferability
+- Easy adaptation through prompting or fine-tuning
+- State-of-the-art performance across many domains
+
+---
+
+# ⚠️ Limitations
+
+- Extremely expensive to pretrain
+- Requires massive compute resources
+- Large memory requirements
+- Can hallucinate incorrect information
+- May inherit biases from training data
+- Knowledge becomes outdated unless refreshed or combined with retrieval
+- Deployment can be computationally expensive
+
+---
+
+# 🌎 Popular Foundation Models
+
+| Model | Domain | Organization | Training Objective |
+|--------|--------|--------------|--------------------|
+| GPT | Language | OpenAI | Next Token Prediction |
+| Llama | Language | Meta | Next Token Prediction |
+| Gemma | Language | Google | Next Token Prediction |
+| Qwen | Language | Alibaba | Next Token Prediction |
+| Mistral | Language | Mistral AI | Next Token Prediction |
+| DeepSeek | Language | DeepSeek AI | Next Token Prediction |
+| ViT | Vision | Google | Image Representation Learning |
+| DINOv2 | Vision | Meta | Self-Distillation |
+| MAE | Vision | Meta | Masked Image Reconstruction |
+| SAM | Vision | Meta | Large-Scale Segmentation Pretraining |
+| CLIP | Vision + Language | OpenAI | Contrastive Learning |
+| Whisper | Speech | OpenAI | Sequence Prediction |
+| wav2vec 2.0 | Speech | Meta | Masked Speech Prediction |
+| VideoMAE | Video | Meta | Masked Video Reconstruction |
+| Sora | Video Generation | OpenAI | Video Generation Pretraining |
+
+---
+
+# 📈 Where Are Foundation Models Used?
+
+- Chatbots
+- Search Engines
+- Code Assistants
+- Recommendation Systems
+- Medical AI
+- Autonomous Vehicles
+- Robotics
+- Drug Discovery
+- Finance
+- Cybersecurity
+- Image Editing
+- Video Generation
+- Speech Recognition
+
+---
+
+# 🎯 Interview Questions
+
+## Q1. What is a Foundation Model?
+
+> A Foundation Model is a large-scale model trained on massive, diverse datasets using self-supervised learning. It learns general-purpose representations that can be adapted to many downstream tasks through prompting, fine-tuning, or parameter-efficient adaptation techniques.
+
+---
+
+## Q2. Why are Foundation Models important?
+
+- They reduce the need to train separate models for every task.
+- They leverage massive unlabeled datasets through self-supervised learning.
+- They enable transfer learning, Zero-Shot, and Few-Shot learning.
+- They provide a common foundation for a wide range of AI applications.
+
+---
+
+## Q3. What is the difference between a Foundation Model and an LLM?
+
+| Foundation Model | Large Language Model (LLM) |
+|------------------|----------------------------|
+| General category of pretrained models | A specific type of Foundation Model |
+| Can process text, images, speech, video, or multiple modalities | Primarily processes language (some modern LLMs are multimodal) |
+| Includes vision, speech, video, and multimodal models | Focused on natural language understanding and generation |
+| Examples: CLIP, SAM, Whisper, DINOv2, GPT | Examples: GPT, Llama, Gemma, Qwen |
+
+**Key Point:** Every **Large Language Model (LLM)** is a **Foundation Model**, but **not every Foundation Model is an LLM**.
+
+---
+
+# 📝 Key Takeaways
+
+- Foundation Models are pretrained on massive datasets using **Self-Supervised Learning**.
+- They learn **general-purpose representations** instead of solving a single task.
+- They can be adapted using **Prompting**, **Fine-Tuning**, or **Parameter-Efficient Fine-Tuning (PEFT)**.
+- Foundation Models exist across multiple domains, including **Language**, **Vision**, **Speech**, **Video**, and **Multimodal AI**.
+- Modern AI systems such as **GPT**, **Llama**, **CLIP**, **SAM**, **Whisper**, **DINOv2**, and **Sora** are all examples of Foundation Models.
+
+
 # 📚 Self-Supervised Learning (SSL)
 
 Self-Supervised Learning (SSL) is a machine learning paradigm where the **training labels are automatically generated from the input data itself**, eliminating the need for manually annotated labels.
