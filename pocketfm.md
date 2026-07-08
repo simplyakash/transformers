@@ -2880,3 +2880,200 @@ Instead of predicting only CTR, I'd predict:
 - Probability of returning the next day (retention)
 
 This better aligns the recommendation system with the platform's business goals.
+
+
+
+# 📚 List of Tokenizers and Compatible Embedding Models
+
+A **tokenizer** converts raw text into **tokens (IDs)** that a model understands.
+
+> **Important:** Every embedding model must use **its own tokenizer** (or the tokenizer it was trained with). Mixing tokenizers generally degrades performance because token IDs and vocabularies no longer align with the model's learned embeddings.
+
+---
+
+# 🎯 Tokenizer → Embedding Model Compatibility
+
+| Tokenizer | Tokenization Method | Compatible Embedding Models | Notes |
+|-----------|----------------------|-----------------------------|-------|
+| BERT Tokenizer | WordPiece | BERT, Sentence-BERT (SBERT), MiniLM, MPNet (Hugging Face implementation) | Case-sensitive or uncased variants |
+| RoBERTa Tokenizer | Byte-Level BPE | RoBERTa, BGE-Reranker (RoBERTa-based variants) | No `token_type_ids` |
+| GPT-2 Tokenizer | Byte-Level BPE | GPT-2 embeddings | Decoder-only tokenizer |
+| CLIP Tokenizer | Byte-Level BPE | CLIP Text Encoder, OpenCLIP | Used for vision-language models |
+| T5 Tokenizer | SentencePiece | T5, Flan-T5, E5 (T5-based variants) | Encoder-decoder models |
+| mT5 Tokenizer | SentencePiece | mT5 | Multilingual |
+| XLM-R Tokenizer | SentencePiece | XLM-R, LaBSE | Multilingual |
+| Llama Tokenizer | SentencePiece | Llama 1, Llama 2, Llama 3 | Decoder-only models |
+| Mistral Tokenizer | SentencePiece | Mistral, Mixtral | Llama-compatible vocabulary in many implementations |
+| Gemma Tokenizer | SentencePiece | Gemma | Google model family |
+| Qwen Tokenizer | Byte-Level BPE | Qwen, Qwen2, Qwen3 | Multilingual support |
+| DeepSeek Tokenizer | Byte-Level BPE | DeepSeek LLMs | Similar style to modern decoder LLMs |
+| Phi Tokenizer | SentencePiece / BPE (model-dependent) | Phi-2, Phi-3 | Check model version |
+| Falcon Tokenizer | Byte-Level BPE | Falcon | GPT-style tokenizer |
+| BLOOM Tokenizer | Byte-Level BPE | BLOOM | Multilingual |
+| ELECTRA Tokenizer | WordPiece | ELECTRA | BERT-compatible vocabulary |
+| DistilBERT Tokenizer | WordPiece | DistilBERT | Compatible with BERT vocabulary |
+| ALBERT Tokenizer | SentencePiece | ALBERT | Shared parameters across layers |
+| DeBERTa Tokenizer | SentencePiece / BPE (version-dependent) | DeBERTa, DeBERTa-v3 | Check specific checkpoint |
+
+---
+
+# 📚 Popular Embedding Models and Their Tokenizers
+
+| Embedding Model | Tokenizer | Embedding Dimension |
+|-----------------|-----------|--------------------:|
+| all-MiniLM-L6-v2 | BERT Tokenizer | 384 |
+| all-mpnet-base-v2 | MPNet/BERT Tokenizer | 768 |
+| multi-qa-MiniLM-L6-cos-v1 | BERT Tokenizer | 384 |
+| bge-small-en-v1.5 | XLM-R Tokenizer | 384 |
+| bge-base-en-v1.5 | XLM-R Tokenizer | 768 |
+| bge-large-en-v1.5 | XLM-R Tokenizer | 1024 |
+| bge-m3 | XLM-R Tokenizer | 1024 |
+| e5-small-v2 | BERT Tokenizer | 384 |
+| e5-base-v2 | BERT Tokenizer | 768 |
+| e5-large-v2 | BERT Tokenizer | 1024 |
+| multilingual-e5-large | XLM-R Tokenizer | 1024 |
+| jina-embeddings-v2-base-en | XLM-R Tokenizer | 768 |
+| jina-embeddings-v3 | XLM-R Tokenizer | 1024 |
+| UAE-Large-V1 | BERT Tokenizer | 1024 |
+| GTE-base | BERT Tokenizer | 768 |
+| GTE-large | BERT Tokenizer | 1024 |
+| NV-Embed-v2 | Llama Tokenizer | 4096 |
+| Stella-1.5B | Llama Tokenizer | Model-dependent |
+
+---
+
+# 🏗️ Which Tokenization Algorithms Are Used?
+
+| Tokenization Algorithm | Models Using It |
+|-------------------------|-----------------|
+| WordPiece | BERT, DistilBERT, MiniLM, ELECTRA, E5, GTE |
+| Byte Pair Encoding (BPE) | GPT-2, RoBERTa, CLIP |
+| Byte-Level BPE | GPT, RoBERTa, Qwen, Falcon, BLOOM |
+| SentencePiece | T5, mT5, Llama, Gemma, XLM-R, ALBERT, Mistral |
+
+---
+
+# 📊 Compatibility Overview
+
+```text
+                 Raw Text
+                     │
+                     ▼
+                Tokenizer
+                     │
+                     ▼
+                Token IDs
+                     │
+                     ▼
+             Embedding Model
+                     │
+                     ▼
+              Dense Embedding
+```
+
+The tokenizer and embedding model must be compatible because the embedding layer expects the token IDs produced by its own vocabulary.
+
+---
+
+# ❌ What Happens If You Use the Wrong Tokenizer?
+
+Example:
+
+```text
+Text
+
+"The cat sat on the mat."
+```
+
+Using
+
+```text
+BERT Tokenizer
+```
+
+might produce
+
+```text
+[101, 1996, 4937, ...]
+```
+
+Using
+
+```text
+Llama Tokenizer
+```
+
+might produce completely different token IDs.
+
+If these IDs are fed into the wrong model:
+
+```text
+Llama Tokens
+
+↓
+
+BERT Embedding Model
+```
+
+the model will interpret the IDs incorrectly, leading to poor embeddings or invalid inputs.
+
+---
+
+# 🎯 Recommendation for RAG
+
+| Embedding Model | Use This Tokenizer |
+|-----------------|--------------------|
+| BGE | XLM-R Tokenizer |
+| E5 | Official E5/BERT Tokenizer |
+| MiniLM | BERT Tokenizer |
+| MPNet | MPNet Tokenizer |
+| Jina Embeddings | Official Jina Tokenizer |
+| GTE | Official GTE/BERT Tokenizer |
+| NV-Embed | Llama Tokenizer |
+
+> **Best Practice:** Always load the tokenizer from the **same model checkpoint** as the embedding model.
+
+Example (Hugging Face):
+
+```python
+from transformers import AutoTokenizer, AutoModel
+
+tokenizer = AutoTokenizer.from_pretrained("BAAI/bge-base-en-v1.5")
+model = AutoModel.from_pretrained("BAAI/bge-base-en-v1.5")
+```
+
+This guarantees that the tokenizer vocabulary matches the model's embedding layer.
+
+---
+
+# 🎤 Interview Questions
+
+## Q1. Can I use any tokenizer with any embedding model?
+
+**No.**
+
+The tokenizer must match the tokenizer used during the model's pretraining. Otherwise, token IDs and vocabularies will not align, resulting in degraded or incorrect embeddings.
+
+---
+
+## Q2. Why do embedding models require their own tokenizer?
+
+The model's embedding layer contains a vector for each token in its vocabulary. If a different tokenizer produces different token IDs or splits words differently, the model receives inputs it was not trained to interpret correctly.
+
+---
+
+## Q3. Which tokenization algorithms are most common?
+
+- **WordPiece** → BERT family
+- **SentencePiece** → Llama, T5, Gemma, XLM-R
+- **Byte-Level BPE** → GPT, RoBERTa, Qwen, Falcon, BLOOM
+
+---
+
+# 📝 Key Takeaways
+
+- A tokenizer converts text into token IDs.
+- An embedding model converts those token IDs into dense vectors.
+- The tokenizer and embedding model must come from the **same pretrained model family**.
+- Common tokenization algorithms include **WordPiece**, **SentencePiece**, and **Byte-Level BPE**.
+- For production systems, always use the tokenizer provided with the embedding model checkpoint.
