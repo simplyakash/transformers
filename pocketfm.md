@@ -3077,3 +3077,490 @@ The model's embedding layer contains a vector for each token in its vocabulary. 
 - The tokenizer and embedding model must come from the **same pretrained model family**.
 - Common tokenization algorithms include **WordPiece**, **SentencePiece**, and **Byte-Level BPE**.
 - For production systems, always use the tokenizer provided with the embedding model checkpoint.
+
+
+# 📚 When Should You Use Word, Subword, Character, or Sentence Tokenization?
+
+There is **no universally best tokenizer**. The choice depends on your **task**, **language**, **dataset**, and **model architecture**.
+
+---
+
+# 🎯 Decision Tree
+
+```text
+                    What are you building?
+                            │
+        ┌───────────────────┼────────────────────┐
+        │                   │                    │
+        ▼                   ▼                    ▼
+   Classical NLP        Modern LLMs        Special Languages
+        │                   │                    │
+        ▼                   ▼                    ▼
+ Word Tokenizer      Subword Tokenizer    Character/Subword
+```
+
+---
+
+# 1️⃣ Word Tokenization
+
+## 📖 What is it?
+
+Splits text into **complete words**.
+
+Example
+
+Input
+
+```text
+I love machine learning.
+```
+
+Output
+
+```text
+["I", "love", "machine", "learning"]
+```
+
+---
+
+## ✅ Advantages
+
+- Easy to understand
+- Human-readable
+- Fast
+- Good for classical NLP
+
+---
+
+## ❌ Disadvantages
+
+Suppose the model sees
+
+```text
+ChatGPT
+```
+
+but during training it never appeared.
+
+The tokenizer produces
+
+```text
+Unknown Word (UNK)
+```
+
+The model learns nothing useful.
+
+Large vocabularies are also required.
+
+---
+
+## ✅ Best For
+
+- Classical Machine Learning
+- Bag of Words
+- TF-IDF
+- BM25
+- Small datasets
+
+---
+
+# 2️⃣ Character Tokenization
+
+## 📖 What is it?
+
+Every character becomes one token.
+
+Example
+
+Input
+
+```text
+ChatGPT
+```
+
+Output
+
+```text
+["C","h","a","t","G","P","T"]
+```
+
+---
+
+## ✅ Advantages
+
+Never has unknown words.
+
+Every word can always be represented.
+
+Example
+
+```text
+SuperMegaUltraAIModel
+```
+
+No problem.
+
+---
+
+## ❌ Disadvantages
+
+Very long sequences.
+
+Example
+
+Word tokenizer
+
+```text
+Machine Learning
+
+↓
+
+2 tokens
+```
+
+Character tokenizer
+
+```text
+Machine Learning
+
+↓
+
+16+ tokens
+```
+
+Training becomes slower.
+
+---
+
+## ✅ Best For
+
+- DNA sequences
+- Protein sequences
+- OCR
+- Spelling correction
+- Noisy social media text
+
+---
+
+# 3️⃣ Subword Tokenization ⭐ (Most Popular Today)
+
+## 📖 What is it?
+
+Splits common words as whole words and rare words into smaller meaningful pieces.
+
+Example
+
+Input
+
+```text
+unbelievable
+```
+
+Output
+
+```text
+["un", "believ", "able"]
+```
+
+Another example
+
+```text
+ChatGPT
+```
+
+Output
+
+```text
+["Chat", "GPT"]
+```
+
+---
+
+## ✅ Advantages
+
+Handles unknown words gracefully.
+
+Small vocabulary.
+
+Shorter sequences than character tokenization.
+
+Captures word meaning better than character tokenization.
+
+---
+
+## ❌ Disadvantages
+
+Slightly more complex than word tokenization.
+
+---
+
+## ✅ Best For
+
+Almost every modern transformer.
+
+Examples
+
+- BERT
+- GPT
+- Llama
+- Gemma
+- Qwen
+- Mistral
+- CLIP
+- BGE
+- E5
+
+---
+
+# 4️⃣ Sentence Tokenization
+
+## 📖 What is it?
+
+Splits text into complete sentences.
+
+Example
+
+```text
+I love AI.
+It is fascinating.
+```
+
+Output
+
+```text
+Sentence 1
+
+I love AI.
+
+Sentence 2
+
+It is fascinating.
+```
+
+---
+
+## ⚠️ Important
+
+Sentence tokenization is **usually a preprocessing step**, **not** the tokenization used by transformer models.
+
+After splitting into sentences, each sentence is still tokenized into subwords or words.
+
+Pipeline
+
+```text
+Paragraph
+
+↓
+
+Sentence Splitter
+
+↓
+
+Sentence 1
+
+↓
+
+Subword Tokenizer
+
+↓
+
+Token IDs
+```
+
+---
+
+# 📊 Comparison
+
+| Feature | Word | Character | Subword | Sentence |
+|----------|------|-----------|----------|-----------|
+| Vocabulary Size | Large | Very Small | Medium | N/A |
+| Handles Unknown Words | ❌ Poorly | ✅ Yes | ✅ Yes | N/A |
+| Sequence Length | Short | Long | Medium | N/A |
+| Training Speed | Fast | Slow | Fast | Preprocessing only |
+| Used in Modern LLMs | ❌ Rarely | ❌ Rarely | ✅ Almost Always | ❌ No |
+
+---
+
+# 🌍 Real-World Examples
+
+## BM25
+
+```text
+Input
+
+Machine Learning
+```
+
+Usually uses
+
+```text
+Word Tokenization
+```
+
+because BM25 relies on exact lexical matches.
+
+---
+
+## BERT
+
+```text
+unhappiness
+```
+
+becomes
+
+```text
+["un","##happy","##ness"]
+```
+
+Uses
+
+```text
+WordPiece
+```
+
+(Subword tokenization)
+
+---
+
+## GPT
+
+```text
+internationalization
+```
+
+may become
+
+```text
+["international","ization"]
+```
+
+Uses
+
+```text
+Byte-Level BPE
+```
+
+(Subword tokenization)
+
+---
+
+## Llama
+
+Uses
+
+```text
+SentencePiece
+```
+
+(Subword tokenization)
+
+---
+
+## OCR
+
+Image
+
+```text
+HELLO
+```
+
+Often processed as
+
+```text
+H
+E
+L
+L
+O
+```
+
+Character tokenization works well because OCR errors are often character-level.
+
+---
+
+# 🤔 Why Do LLMs Prefer Subword Tokenization?
+
+Suppose someone writes
+
+```text
+electroencephalographically
+```
+
+A word tokenizer might never have seen this word.
+
+A character tokenizer would produce more than 30 tokens.
+
+A subword tokenizer might produce
+
+```text
+electro
+
+encephalo
+
+graph
+
+ically
+```
+
+This gives
+
+- Shorter sequences than characters
+- Better handling of rare words than word tokenization
+- Smaller vocabulary than word-level tokenization
+
+This balance is why almost all modern transformer models use subword tokenization.
+
+---
+
+# 📊 Which Tokenizer Should You Choose?
+
+| Application | Recommended Tokenization |
+|-------------|--------------------------|
+| BM25 | Word |
+| TF-IDF | Word |
+| Naive Bayes | Word |
+| Logistic Regression (NLP) | Word |
+| LLMs (GPT, Llama, Gemma, Qwen) | Subword |
+| BERT | Subword (WordPiece) |
+| T5 | Subword (SentencePiece) |
+| Machine Translation | Subword |
+| Semantic Search | Subword |
+| OCR | Character |
+| DNA Analysis | Character |
+| Protein Modeling | Character |
+| Spell Correction | Character or Subword |
+
+---
+
+# 🎤 Interview Questions
+
+## Q1. Why don't modern LLMs use word tokenization?
+
+Because it creates very large vocabularies and cannot handle unseen words well. Unknown words become `<UNK>`, causing a loss of information.
+
+---
+
+## Q2. Why don't LLMs use character tokenization?
+
+Character tokenization creates very long input sequences, making transformer attention slower and more computationally expensive.
+
+---
+
+## Q3. Why is subword tokenization the preferred choice?
+
+Subword tokenization offers the best trade-off:
+
+- Handles unseen words
+- Keeps vocabulary manageable
+- Produces shorter sequences than character tokenization
+- Preserves meaningful word components
+
+---
+
+# 📝 Key Takeaways
+
+- **Word Tokenization** → Best for traditional NLP methods like TF-IDF and BM25.
+- **Character Tokenization** → Best for domains with many novel strings or character-level patterns, such as OCR, DNA, and spelling correction.
+- **Subword Tokenization** → The standard choice for modern transformer models because it balances vocabulary size, sequence length, and robustness to unseen words.
+- **Sentence Tokenization** → A preprocessing step used to split documents into sentences before applying the model's actual tokenizer.
