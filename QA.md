@@ -1,3 +1,56 @@
+# 🎤 Transformer Interview (Round 1)
+
+## Question 1
+
+Imagine you're explaining Transformers to a junior machine learning engineer.
+
+### Explain:
+
+1. Why were Transformers introduced?
+2. What limitations of RNNs and LSTMs do they solve?
+3. Why is self-attention better than recurrence?
+4. Explain the complete Transformer architecture from input to output.
+5. Mention the role of:
+   - Embedding
+   - Positional Encoding
+   - Multi-Head Attention
+   - Feed Forward Network
+   - Residual Connection
+   - Layer Normalization
+
+---
+
+## Interview Expectation
+
+Your answer should cover:
+
+- The motivation behind Transformers
+- Parallelization
+- Long-range dependency handling
+- Self-attention intuition
+- Encoder and Decoder overview
+- High-level data flow
+
+Target duration:
+
+**3–5 minutes**
+
+---
+
+## Follow-up Questions (Don't answer these yet)
+
+Depending on your answer, I'll ask things like:
+
+- Why do we divide by √dₖ?
+- Why is positional encoding required?
+- Why use multiple attention heads instead of one?
+- Why is LayerNorm used instead of BatchNorm?
+- Why is the FFN dimension 3072 in BERT?
+- What is the difference between encoder self-attention and decoder masked self-attention?
+- What is the purpose of residual connections?
+- What happens if positional encoding is removed?
+- What is the computational complexity of self-attention?
+
 # 🎯 Amazon Applied Scientist (LLM + RAG + GenAI) Mock Interview
 
 I'll act as the interviewer.
