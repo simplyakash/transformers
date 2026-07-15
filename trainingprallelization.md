@@ -2433,3 +2433,597 @@ It is an optimized implementation of the existing scaled dot-product attention a
 
 > "FlashAttention is a memory-efficient and high-performance implementation of the standard scaled dot-product attention algorithm. It produces exactly the same attention output but avoids storing the full N×N attention matrix in GPU memory. Instead, it processes attention in small blocks that fit into fast on-chip memory, computes the softmax and value multiplication on the fly, and immediately discards intermediate results. This greatly reduces memory usage and memory transfers while keeping the computational complexity the same. As a result, FlashAttention enables faster training and inference and supports much longer context lengths on modern GPUs."
 
+# 🎯 How Does FlashAttention Compute Softmax Block-by-Block?
+
+> **Interview Question:** *"If FlashAttention processes only one block at a time instead of the full attention matrix, how can it compute the correct Softmax? Doesn't Softmax require seeing the entire row?"*
+
+This is one of the most common and deepest interview questions about FlashAttention.
+
+---
+
+# 📌 First, Let's Recall Standard Attention
+
+Attention is computed as:
+
+```text
+Attention(Q,K,V)
+
+=
+
+Softmax(QKᵀ / √dₖ)V
+```
+
+Suppose we have one query token.
+
+Its attention scores are:
+
+```text
+Scores
+
+[2, 4, 1, 3]
+```
+
+Softmax requires looking at **all** scores.
+
+---
+
+# Standard Softmax
+
+Step 1
+
+Find maximum value.
+
+```text
+max = 4
+```
+
+---
+
+Step 2
+
+Subtract maximum (for numerical stability).
+
+```text
+[2,4,1,3]
+
+↓
+
+[-2,0,-3,-1]
+```
+
+---
+
+Step 3
+
+Exponentiate.
+
+```text
+[e⁻², e⁰, e⁻³, e⁻¹]
+
+↓
+
+[0.135,1,0.050,0.368]
+```
+
+---
+
+Step 4
+
+Compute denominator.
+
+```text
+0.135
+
++
+
+1
+
++
+
+0.050
+
++
+
+0.368
+
+=
+
+1.553
+```
+
+---
+
+Step 5
+
+Normalize.
+
+```text
+[0.087,
+0.644,
+0.032,
+0.237]
+```
+
+Everything is easy because the **entire row** is available.
+
+---
+
+# 🚨 The Problem in FlashAttention
+
+Suppose we split the row into blocks.
+
+```text
+Scores
+
+[2,4]
+
+[1,3]
+```
+
+If we compute Softmax independently:
+
+---
+
+Block 1
+
+```text
+[2,4]
+
+↓
+
+[0.119,0.881]
+```
+
+---
+
+Block 2
+
+```text
+[1,3]
+
+↓
+
+[0.119,0.881]
+```
+
+Now combine them:
+
+```text
+[0.119,0.881,
+0.119,0.881]
+```
+
+This is **wrong** because:
+
+```text
+Sum = 2
+```
+
+Softmax probabilities must sum to **1**.
+
+---
+
+# 💡 FlashAttention's Key Idea
+
+FlashAttention **does NOT compute Softmax separately for each block.**
+
+Instead, it maintains **running statistics** while processing blocks.
+
+For every query row it keeps only:
+
+```text
+Running Maximum
+
+m
+```
+
+and
+
+```text
+Running Sum
+
+l
+```
+
+These are enough to compute the exact global Softmax.
+
+---
+
+# Example
+
+Scores:
+
+```text
+[2,4,1,3]
+```
+
+Split into
+
+```text
+Block 1
+
+[2,4]
+
+Block 2
+
+[1,3]
+```
+
+---
+
+## Process Block 1
+
+Maximum:
+
+```text
+m₁ = 4
+```
+
+Exponentials:
+
+```text
+[e⁻²,
+e⁰]
+
+↓
+
+[0.135,
+1]
+```
+
+Running denominator:
+
+```text
+l₁
+
+=
+
+1.135
+```
+
+Store:
+
+```text
+m = 4
+
+l = 1.135
+```
+
+---
+
+## Process Block 2
+
+Maximum inside block:
+
+```text
+3
+```
+
+Current global maximum:
+
+```text
+4
+```
+
+Global maximum remains:
+
+```text
+m = 4
+```
+
+Now recompute exponentials relative to the global maximum:
+
+Instead of
+
+```text
+e¹
+
+e³
+```
+
+compute
+
+```text
+e^(1-4)
+
+e^(3-4)
+```
+
+which gives
+
+```text
+e⁻³
+
+e⁻¹
+
+↓
+
+0.050
+
+0.368
+```
+
+Update denominator:
+
+```text
+l
+
+=
+
+1.135
+
++
+
+0.050
+
++
+
+0.368
+
+=
+
+1.553
+```
+
+Notice:
+
+This is exactly the denominator obtained by standard Softmax.
+
+---
+
+# Final Normalization
+
+Now all values are divided by
+
+```text
+1.553
+```
+
+Result:
+
+```text
+[0.087,
+0.644,
+0.032,
+0.237]
+```
+
+Exactly the same as standard attention.
+
+---
+
+# 🧠 What If a Later Block Has a Larger Maximum?
+
+Suppose
+
+```text
+Block 1
+
+[2,4]
+
+↓
+
+Maximum = 4
+```
+
+Later
+
+```text
+Block 2
+
+[7,5]
+```
+
+Now the new global maximum becomes:
+
+```text
+7
+```
+
+Does this break the previous computation?
+
+**No.**
+
+FlashAttention rescales the previous running denominator.
+
+Previously
+
+```text
+l_old
+```
+
+was computed relative to
+
+```text
+m_old = 4
+```
+
+Now
+
+```text
+m_new = 7
+```
+
+So FlashAttention updates:
+
+```text
+l_new
+
+=
+
+l_old × e^(4-7)
+
++
+
+New Block Contribution
+```
+
+Since
+
+```text
+e^(4-7)
+
+=
+
+e⁻³
+```
+
+the previous contributions are simply rescaled.
+
+This makes the running denominator mathematically identical to computing Softmax over the full row at once.
+
+---
+
+# 📌 Running Statistics Maintained
+
+For each query row FlashAttention stores only:
+
+```text
+Running Maximum (m)
+
+Running Denominator (l)
+
+Running Output
+```
+
+It never stores the full attention matrix.
+
+---
+
+# Why Is This Memory Efficient?
+
+Standard Attention stores:
+
+```text
+N × N
+
+Attention Matrix
+```
+
+FlashAttention stores only:
+
+```text
+Current Block
+
++
+
+Running Maximum
+
++
+
+Running Denominator
+
++
+
+Output
+```
+
+Memory usage is dramatically lower.
+
+---
+
+# Visual Comparison
+
+## Standard Attention
+
+```text
+Scores
+
+□□□□□□□□□□□□□□□□□□□□□□□□
+
+↓
+
+Store Entire Matrix
+
+↓
+
+Softmax
+
+↓
+
+Multiply by V
+```
+
+---
+
+## FlashAttention
+
+```text
+Block 1
+
+■■■■
+
+↓
+
+Update
+
+m
+
+↓
+
+Update
+
+l
+
+↓
+
+Update Output
+
+↓
+
+Discard Block
+
+↓
+
+Block 2
+
+■■■■
+
+↓
+
+Repeat
+```
+
+The intermediate blocks are discarded after processing.
+
+---
+
+# 🎯 Key Mathematical Insight
+
+Softmax depends only on:
+
+1. The **maximum value** (for numerical stability).
+2. The **sum of exponentials**.
+
+FlashAttention maintains both incrementally across blocks.
+
+Therefore:
+
+```text
+Softmax(Block-wise)
+
+=
+
+Softmax(Whole Matrix)
+```
+
+The result is **exact**, not approximate.
+
+---
+
+# ⭐ Interview Tip
+
+If asked:
+
+> **"How can FlashAttention compute Softmax without storing the full attention matrix?"**
+
+A strong answer is:
+
+> "FlashAttention processes one block at a time while maintaining a running maximum and a running sum of exponentials for each query row. If a later block contains a larger maximum, it rescales the previously accumulated denominator before adding the new block's contribution. This online Softmax algorithm produces exactly the same probabilities as standard Softmax, but without materializing the full attention matrix in memory."
+
+---
+
+# 🎯 30-Second Interview Answer
+
+> "Although FlashAttention processes attention scores block by block, it does not compute Softmax independently for each block. Instead, it uses an online Softmax algorithm that keeps a running maximum and a running denominator for every query row. As each block is processed, these statistics are updated, and if a larger maximum is encountered later, the previous values are rescaled accordingly. This guarantees that the final Softmax is mathematically identical to the full attention computation while using far less GPU memory."
+
