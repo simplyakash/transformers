@@ -162,6 +162,13 @@ $$
 ### ROUGE-L
 - Based on Longest Common Subsequence (LCS)
 
+
+| BLEU | ROUGE |
+|------|--------|
+| Precision-oriented | Recall-oriented |
+| "How correct is the generated text?" | "How much reference content was covered?" |
+| Penalizes extra words | Penalizes missing words |
+| Common for Machine Translation | Common for Summarization |
 ---
 
 
