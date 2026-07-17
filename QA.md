@@ -542,6 +542,473 @@ This motivates techniques such as:
 # 🎯 3-Minute Interview Answer
 
 > "Transformers were introduced to overcome the limitations of RNNs and LSTMs, particularly their sequential computation, difficulty modeling long-range dependencies, and limited parallelism. In RNNs, each token depends on the previous hidden state, making training slow and limiting GPU utilization. Transformers replace recurrence with self-attention, allowing every token to directly attend to every other token in parallel. The architecture begins by converting tokens into embeddings and adding positional encodings to preserve word order. These embeddings pass through multiple encoder or decoder blocks. Each block computes multi-head self-attention using Query, Key, and Value projections, followed by a residual connection and Layer Normalization. A position-wise Feed Forward Network then transforms each token independently, followed again by a residual connection and Layer Normalization. Multi-head attention allows different heads to learn different linguistic relationships simultaneously. The final contextual representations are used by downstream tasks such as classification, translation, question answering, or next-token prediction. Compared with RNNs, Transformers train faster, capture long-range dependencies more effectively, and scale efficiently to modern large language models."
+
+# 🎯 Why is Feed Forward Network (FFN) Complexity = $O(N \cdot d \cdot d_{ff})$?
+
+> **Interview Question:** *"The Feed Forward Network processes each token independently. Why is its time complexity $O(N \cdot d \cdot d_{ff})$?"*
+
+---
+
+# 📌 Notation
+
+| Symbol | Meaning |
+|---------|---------|
+| $N$ | Number of tokens (sequence length) |
+| $d$ | Hidden dimension (e.g., 768 in BERT-Base) |
+| $d_{ff}$ | Feed Forward hidden dimension (3072 in BERT-Base) |
+
+For BERT-Base:
+
+```text
+N = Sequence Length
+
+d = 768
+
+d_ff = 3072
+```
+
+---
+
+# 📌 Feed Forward Network
+
+The FFN consists of two linear layers:
+
+```text
+Input
+
+↓
+
+Linear (d → d_ff)
+
+↓
+
+GELU
+
+↓
+
+Linear (d_ff → d)
+
+↓
+
+Output
+```
+
+---
+
+# 📌 Input Shape
+
+Suppose
+
+```text
+Sequence Length = 5
+```
+
+Then the input tensor is
+
+```text
+(5 × 768)
+```
+
+Each row is one token.
+
+```text
+Token 1
+
+[768]
+
+Token 2
+
+[768]
+
+...
+
+Token 5
+
+[768]
+```
+
+---
+
+# 📌 First Linear Layer
+
+Weight matrix:
+
+```text
+W₁
+
+(768 × 3072)
+```
+
+Multiplication:
+
+```text
+(5 × 768)
+
+×
+
+(768 × 3072)
+
+↓
+
+(5 × 3072)
+```
+
+---
+
+# 📌 Cost for One Token
+
+For **one token**, multiplying
+
+```text
+(1 × 768)
+
+×
+
+(768 × 3072)
+```
+
+requires approximately
+
+```text
+768 × 3072
+```
+
+multiply-add operations.
+
+In general:
+
+```text
+One Token
+
+↓
+
+d × d_ff
+```
+
+---
+
+# 📌 Cost for N Tokens
+
+Since every token goes through the **same FFN independently**:
+
+```text
+Token 1
+
+↓
+
+Linear
+```
+
+```text
+Token 2
+
+↓
+
+Linear
+```
+
+...
+
+```text
+Token N
+
+↓
+
+Linear
+```
+
+Total cost:
+
+```text
+N
+
+×
+
+(d × d_ff)
+
+=
+
+N · d · d_ff
+```
+
+Therefore,
+
+```text
+Time Complexity
+
+=
+
+O(N · d · d_ff)
+```
+
+---
+
+# 📌 Second Linear Layer
+
+Now project back:
+
+```text
+(5 × 3072)
+
+×
+
+(3072 × 768)
+
+↓
+
+(5 × 768)
+```
+
+Again,
+
+For one token:
+
+```text
+d_ff × d
+```
+
+For all tokens:
+
+```text
+N × d_ff × d
+```
+
+---
+
+# 📌 Total FFN Complexity
+
+Both linear layers contribute:
+
+```text
+First Layer
+
+O(N · d · d_ff)
+
++
+
+Second Layer
+
+O(N · d_ff · d)
+```
+
+Since multiplication is commutative,
+
+```text
+d · d_ff
+
+=
+
+d_ff · d
+```
+
+we combine them:
+
+```text
+O(2 · N · d · d_ff)
+```
+
+In Big-O notation, constant factors are ignored.
+
+Final complexity:
+
+```text
+O(N · d · d_ff)
+```
+
+---
+
+# 📌 Why Doesn't It Become $O(N²)$?
+
+The key idea is:
+
+> **The FFN does not mix information between different tokens.**
+
+Each token is processed independently.
+
+Example:
+
+```text
+Token 1
+
+↓
+
+FFN
+```
+
+```text
+Token 2
+
+↓
+
+FFN
+```
+
+There is **no interaction** between Token 1 and Token 2 inside the FFN.
+
+Therefore, the computation grows **linearly** with the number of tokens.
+
+---
+
+# 📌 Compare with Self-Attention
+
+Self-attention computes interactions between **every pair of tokens**.
+
+Example:
+
+```text
+Token 1 ↔ Token 2
+
+Token 1 ↔ Token 3
+
+...
+
+Token N ↔ Token N
+```
+
+Number of interactions:
+
+```text
+N × N
+
+=
+
+N²
+```
+
+Hence,
+
+```text
+Self-Attention
+
+↓
+
+O(N² · d)
+```
+
+---
+
+# 📊 Comparison
+
+| Operation | Why? | Complexity |
+|-----------|------|------------|
+| Feed Forward Network | Each token processed independently | $O(N \cdot d \cdot d_{ff})$ |
+| Self-Attention | Every token attends to every other token | $O(N^2 \cdot d)$ |
+
+---
+
+# 📌 Numerical Example
+
+Suppose:
+
+```text
+N = 512
+
+d = 768
+
+d_ff = 3072
+```
+
+First linear layer:
+
+```text
+512
+
+×
+
+768
+
+×
+
+3072
+
+≈
+
+1.21 Billion operations
+```
+
+Second linear layer:
+
+```text
+512
+
+×
+
+3072
+
+×
+
+768
+
+≈
+
+1.21 Billion operations
+```
+
+Total:
+
+```text
+≈ 2.42 Billion operations
+```
+
+This is proportional to:
+
+```text
+O(N · d · d_ff)
+```
+
+---
+
+# 📌 Intuition
+
+Imagine a classroom of students.
+
+### Feed Forward Network
+
+Each student solves their own worksheet independently.
+
+```text
+Student 1
+
+↓
+
+Worksheet
+```
+
+```text
+Student 2
+
+↓
+
+Worksheet
+```
+
+No student talks to another.
+
+Work grows **linearly** with the number of students.
+
+---
+
+### Self-Attention
+
+Now every student must discuss with every other student.
+
+```text
+Student 1 ↔ Student 2
+
+Student 1 ↔ Student 3
+
+...
+
+Student N ↔ Student N
+```
+
+The number of conversations grows quadratically.
+
+---
+
+# 🎯 Interview Answer
+
+> "The Feed Forward Network applies the same two-layer MLP independently to every token. For one token, the first linear layer costs approximately $d \times d_{ff}$ operations and the second costs $d_{ff} \times d$. Across $N$ tokens, the total cost becomes $O(N \cdot d \cdot d_{ff})$. Unlike self-attention, the FFN does not compute interactions between tokens, so its complexity grows linearly with the sequence length rather than quadratically."
 # 🎯 Amazon Applied Scientist (LLM + RAG + GenAI) Mock Interview
 
 I'll act as the interviewer.
