@@ -1181,3 +1181,578 @@ He searches for regions matching that description.
 # 🎯 Interview Answer
 
 > "Grounding DINO extends the DETR architecture by incorporating language understanding. Like DETR, it uses a vision backbone, Transformer encoder, object queries, and a Transformer decoder to predict bounding boxes. However, unlike DETR, Grounding DINO also encodes a text prompt using a pretrained language model and performs cross-modal alignment between image features and text embeddings. Instead of classifying objects into a fixed set of categories, it computes similarity between image regions and the text prompt, enabling open-vocabulary and zero-shot object detection without retraining."
+
+# 🚀 What is a Cross-Modal Transformer?
+
+> **Interview Question:** *"What is a Cross-Modal Transformer? Why is it used in Grounding DINO, BLIP, Flamingo, and other Vision-Language Models?"*
+
+A **Cross-Modal Transformer** is a Transformer that **learns relationships between two different modalities**, such as:
+
+- 🖼️ Image + Text
+- 🎥 Video + Text
+- 🎤 Audio + Text
+
+Instead of processing only one type of input, it allows information from one modality to influence the representation of the other.
+
+---
+
+# 📌 What is a Modality?
+
+A modality is simply a type of data.
+
+Examples:
+
+```text
+Image
+
+↓
+
+Pixels
+```
+
+```text
+Text
+
+↓
+
+Words
+```
+
+```text
+Audio
+
+↓
+
+Waveforms
+```
+
+```text
+Video
+
+↓
+
+Frames
+```
+
+Each represents information in a different form.
+
+---
+
+# 📌 Single-Modal Transformer
+
+## BERT
+
+Input:
+
+```text
+"I love transformers"
+```
+
+Only text.
+
+```text
+Text Tokens
+
+↓
+
+Self-Attention
+
+↓
+
+Text Embeddings
+```
+
+No images involved.
+
+---
+
+## ViT
+
+Input:
+
+```text
+Image
+```
+
+Only image patches.
+
+```text
+Image Patches
+
+↓
+
+Self-Attention
+
+↓
+
+Image Features
+```
+
+No text involved.
+
+---
+
+# 📌 Cross-Modal Transformer
+
+Now suppose we have:
+
+Image:
+
+🖼️
+
+and
+
+Text:
+
+```text
+"red bottle"
+```
+
+We want the model to answer:
+
+> Which region in the image corresponds to **"red bottle"**?
+
+The model must combine image and language information.
+
+---
+
+# 📌 High-Level Pipeline
+
+```text
+            Image                     Text
+              │                        │
+              ▼                        ▼
+      Vision Encoder             Text Encoder
+              │                        │
+              ▼                        ▼
+      Image Embeddings         Text Embeddings
+               \              /
+                \            /
+                 ▼          ▼
+            Cross-Modal Transformer
+                     │
+                     ▼
+         Vision-Language Features
+```
+
+---
+
+# 📌 Step 1: Encode the Image
+
+Suppose:
+
+```text
+640 × 640 Image
+```
+
+The vision backbone produces:
+
+```text
+Image Tokens
+
+1000 × 256
+```
+
+Meaning:
+
+```text
+1000 image tokens
+
+Each
+
+256 dimensions
+```
+
+---
+
+# 📌 Step 2: Encode the Text
+
+Prompt:
+
+```text
+"red bottle"
+```
+
+BERT outputs:
+
+```text
+Text Tokens
+
+3 × 256
+```
+
+Example:
+
+```text
+"red"
+
+↓
+
+256 dimensions
+```
+
+```text
+"bottle"
+
+↓
+
+256 dimensions
+```
+
+---
+
+# 📌 Step 3: Cross-Attention
+
+This is where the two modalities interact.
+
+Unlike **self-attention**, where Q, K, and V all come from the same source, **cross-attention** uses one modality to query another.
+
+---
+
+# 📌 Self-Attention
+
+In a text Transformer:
+
+```text
+Q
+
+↓
+
+Text
+```
+
+```text
+K
+
+↓
+
+Text
+```
+
+```text
+V
+
+↓
+
+Text
+```
+
+Everything comes from the same sequence.
+
+Formula:
+
+```text
+Attention
+
+=
+
+Softmax
+
+(
+
+QKᵀ
+
+────
+
+√d
+
+)
+
+×
+
+V
+```
+
+---
+
+# 📌 Cross-Attention
+
+Suppose we want text to search the image.
+
+Queries:
+
+```text
+Text Embeddings
+```
+
+Keys:
+
+```text
+Image Embeddings
+```
+
+Values:
+
+```text
+Image Embeddings
+```
+
+Formula:
+
+```text
+Attention
+
+=
+
+Softmax
+
+(
+
+TextQ
+
+×
+
+ImageKᵀ
+
+────────────
+
+√d
+
+)
+
+×
+
+ImageV
+```
+
+Now each text token attends to image regions.
+
+---
+
+# 📌 Example
+
+Prompt:
+
+```text
+"dog"
+```
+
+Image contains:
+
+```text
+Dog
+
+Tree
+
+Car
+```
+
+The attention matrix might look like:
+
+| Text Token | Dog Region | Tree Region | Car Region |
+|------------|-----------:|------------:|-----------:|
+| dog | 0.92 | 0.03 | 0.05 |
+
+The token **"dog"** focuses primarily on the dog region.
+
+---
+
+# 📌 Visualization
+
+```text
+Image Tokens
+
+Patch 1
+
+Patch 2
+
+Patch 3
+
+Patch 4
+```
+
+↓
+
+Cross Attention
+
+↑
+
+```text
+"red"
+
+"bottle"
+```
+
+The text tokens decide which image patches are most relevant.
+
+---
+
+# 📌 Why Is This Useful?
+
+Without cross-modal attention:
+
+```text
+Image
+
+↓
+
+Objects
+```
+
+The model knows there is a bottle, but it doesn't know **which object the prompt refers to**.
+
+With cross-modal attention:
+
+```text
+Prompt
+
+↓
+
+"red bottle"
+
+↓
+
+Locate only the red bottle
+```
+
+The text guides the visual search.
+
+---
+
+# 📌 In Grounding DINO
+
+Image:
+
+```text
+Package
+```
+
+Prompt:
+
+```text
+"barcode"
+```
+
+Cross-attention allows the object queries to focus on image regions that match the concept of **barcode**.
+
+Output:
+
+```text
+Bounding Box
+
+around
+
+Barcode
+```
+
+---
+
+# 📌 Difference Between Self-Attention and Cross-Attention
+
+## Self-Attention
+
+```text
+Sentence
+
+↓
+
+"I love AI"
+
+↓
+
+Words attend to words
+```
+
+---
+
+## Cross-Attention
+
+```text
+Image
+
++
+
+Text
+
+↓
+
+Words attend to image regions
+```
+
+---
+
+# 📌 Example in BLIP
+
+Question:
+
+```text
+"What color is the car?"
+```
+
+Image:
+
+🚗
+
+The word:
+
+```text
+"car"
+```
+
+attends to the car region.
+
+The word:
+
+```text
+"color"
+```
+
+attends to the pixels that encode the car's appearance.
+
+---
+
+# 📌 Example in Flamingo
+
+Image:
+
+🍎
+
+Question:
+
+```text
+"What fruit is shown?"
+```
+
+The text tokens attend to image features before generating:
+
+```text
+"Apple"
+```
+
+---
+
+# 📌 Why Grounding DINO Needs It
+
+Suppose the image contains:
+
+- Bottle
+- Cup
+- Barcode
+- QR code
+
+Prompt:
+
+```text
+"barcode"
+```
+
+The model should **not** detect all objects.
+
+Cross-modal attention aligns the language with the correct image region.
+
+---
+
+# 📌 Summary
+
+| Self-Attention | Cross-Attention |
+|---------------|-----------------|
+| One modality | Two modalities |
+| Q, K, V from same input | Q from one modality, K and V from another |
+| Text ↔ Text | Text ↔ Image (or other modalities) |
+| Used in BERT, ViT | Used in Grounding DINO, BLIP, Flamingo, LLaVA |
+
+---
+
+# 🎯 Interview Answer
+
+> "A Cross-Modal Transformer is a Transformer that learns relationships between different modalities, such as images and text. It typically uses cross-attention, where the queries come from one modality and the keys and values come from another. For example, in Grounding DINO, text embeddings generated by a language encoder interact with image embeddings produced by a vision backbone. This allows the model to align language with visual regions, enabling tasks such as open-vocabulary object detection, visual question answering, and image captioning."
